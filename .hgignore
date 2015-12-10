@@ -1,0 +1,5 @@
+syntax: glob
+RazerHydraTest/Library/*
+*.csproj
+RazerHydraTest/RazerHydraTest.sln
+*.suo
