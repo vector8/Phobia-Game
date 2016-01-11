@@ -3,3 +3,5 @@ RazerHydraTest/Library/*
 *.csproj
 RazerHydraTest/RazerHydraTest.sln
 *.suo
+TeaserCinematic/Library/*
+TeaserCinematic/TeaserCinematic.sln
