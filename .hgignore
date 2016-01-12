@@ -5,3 +5,4 @@ RazerHydraTest/RazerHydraTest.sln
 *.suo
 TeaserCinematic/Library/*
 TeaserCinematic/TeaserCinematic.sln
+RazerHydraTest/Temp/*
