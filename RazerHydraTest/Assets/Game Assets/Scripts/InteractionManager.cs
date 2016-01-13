@@ -15,7 +15,7 @@ public class InteractionManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            Interactable i = hit.transform.gameObject.GetComponent<Interactable>();
+            Interactable i = hit.collider.transform.gameObject.GetComponent<Interactable>();
             if (i != null && Vector3.Distance(this.transform.position, i.transform.position) < i.getActivationRange())
             {
                 target = i;
