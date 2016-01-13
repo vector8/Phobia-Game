@@ -5,10 +5,14 @@ using System;
 public class Drawer : Interactable
 {
     bool m_open = false;
+    float m_Range = 10f;
+    public AudioClip m_Open;
+    public AudioClip m_Close;
+    AudioSource cached_AS;
     // Use this for initialization
     void Start()
     {
-
+        cached_AS = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -21,13 +25,22 @@ public class Drawer : Interactable
     {
         if (m_open)
         {
-            transform.Translate(0f,0f,(gameObject.transform.forward.z * -0.5f));
+            cached_AS.clip = m_Close;
+            cached_AS.Play();
+            transform.position -= transform.forward * 1.3f;
             m_open = false;
         }
         else
         {
-            transform.Translate(0f, 0f, gameObject.transform.forward.z * 0.5f);
+            cached_AS.clip = m_Open;
+            cached_AS.Play();
+            transform.position += transform.forward * 1.3f;
             m_open = true;
         }
+    }
+
+    public override float getActivationRange()
+    {
+        return m_Range;
     }
 }
