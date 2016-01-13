@@ -8,7 +8,7 @@ public abstract class Interactable : MonoBehaviour
 
     public abstract void activate();
 
-    public float getActivationRange()
+    public virtual float getActivationRange()
     {
         return STANDARD_ACTIVATION_RANGE;
     }
