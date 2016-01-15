@@ -1,8 +1,7 @@
 syntax: glob
-RazerHydraTest/Library/*
 *.csproj
-RazerHydraTest/RazerHydraTest.sln
 *.suo
 TeaserCinematic/Library/*
 TeaserCinematic/TeaserCinematic.sln
-RazerHydraTest/Temp/*
+Phobia/Library/*
+Phobia/Phobia.sln
