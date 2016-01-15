@@ -11,7 +11,6 @@ public class FlashlightController : MonoBehaviour
 {
 	public SixenseHands	m_hand;
 	public SixenseInput.Controller m_controller = null;
-    public GameObject flashlight;
 
     Vector3 m_baseOffset;
     float m_sensitivity = 0.001f; // Sixense units are in mm
@@ -46,12 +45,6 @@ public class FlashlightController : MonoBehaviour
 	// Updates the animated object from controller input.
     protected void handleInput()
 	{
-		// toggle flashlight
-		if (m_controller.GetButtonDown(SixenseButtons.TWO))
-		{
-            flashlight.SetActive(!flashlight.activeSelf);	
-		}
-
         bool bResetHandPosition = false;
 
         if (IsControllerActive(m_controller) && m_controller.GetButtonDown(SixenseButtons.START))
