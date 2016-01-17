@@ -48918,8 +48918,9 @@ MonoBehaviour:
   hydraFlashlight: {fileID: 1464721433}
   mouseFlashlight: {fileID: 2070962077}
   flashlightController: {fileID: 895675884}
-  flashlightOn: 1
+  flashlightOn: 0
   useFlashlightBatteryDimming: 0
+  numberOfBatteries: 0
 --- !u!1001 &1420787279
 Prefab:
   m_ObjectHideFlags: 0
@@ -61531,6 +61532,48 @@ Prefab:
 Transform:
   m_PrefabParentObject: {fileID: 441420, guid: 9ea1388b9d0eb8d4cb23e5ba9c922a50, type: 2}
   m_PrefabInternal: {fileID: 1767893315}
+--- !u!1001 &1769771483
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 21.9500008
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 14.7799997
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 26.6639996
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 474846, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+      propertyPath: m_RootOrder
+      value: 15
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 9e83f91e0efa4b54eb364aacd4273296, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1001 &1770468471
 Prefab:
   m_ObjectHideFlags: 0
