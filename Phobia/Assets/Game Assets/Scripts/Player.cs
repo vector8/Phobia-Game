@@ -7,6 +7,8 @@ public class Player : MonoBehaviour
     public Transform controllerToFollow;
 
     public const float MAX_BATTERY_LEVEL = 73f;
+    public const float RELOAD_TIME = 3f;
+
     public float batteryLevel;
     public float batteryDrainRate = 1f;
     public Image batteryFillUI;
@@ -16,6 +18,7 @@ public class Player : MonoBehaviour
     public FlashlightController flashlightController;
     public bool flashlightOn = true;
     public bool useFlashlightBatteryDimming = false;
+    public int numberOfBatteries = 0;
 
     private bool usingHydra = true;
     private Light flashlight;
@@ -23,6 +26,8 @@ public class Player : MonoBehaviour
     private const float BATTERY_FLASH_DURATION = 0.5f;
     private bool batteryRed = false;
     private float batteryFlickerTimer = 0f;
+    private bool reloading = false;
+    private float reloadTimer = 0f;
 
     // Use this for initialization
     void Start()
@@ -48,7 +53,11 @@ public class Player : MonoBehaviour
         transform.rotation = controllerToFollow.rotation;
         transform.localScale = controllerToFollow.localScale;
 
-        updateFlashlight();
+        checkForReload();
+        if(!reloading)
+        {
+            updateFlashlight();
+        }
     }
 
     private void updateFlashlight()
@@ -67,10 +76,7 @@ public class Player : MonoBehaviour
             {
                 batteryLevel -= batteryDrainRate * Time.deltaTime;
 
-                // update UI
-                Vector2 dimensions = batteryFillUI.rectTransform.sizeDelta;
-                dimensions.x = batteryLevel;
-                batteryFillUI.rectTransform.sizeDelta = dimensions;
+                updateBatteryUI();
             }
         }
         else
@@ -134,5 +140,39 @@ public class Player : MonoBehaviour
             flashlight.intensity = 2f;
             flashlight.gameObject.SetActive(flashlightOn && batteryLevel > 0f);
         }
+    }
+
+    private void checkForReload()
+    {
+        if(reloading)
+        {
+            // reloading animation and increment reload timer
+            reloadTimer += Time.deltaTime;
+
+            if(reloadTimer >= RELOAD_TIME)
+            {
+                numberOfBatteries--;
+                batteryLevel += 25;
+                reloadTimer = 0f;
+                reloading = false;
+                flashlight.gameObject.SetActive(flashlightOn);
+                updateBatteryUI();
+            }
+        }
+        else if(numberOfBatteries > 0 &&  batteryLevel < 48f && // TODO: figure out which button is appropriate here
+            ((usingHydra && flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (!usingHydra && Input.GetKeyDown(KeyCode.R))))
+        {
+            // reload
+            reloading = true;
+            flashlight.gameObject.SetActive(false);
+        }
+    }
+
+    private void updateBatteryUI()
+    {
+        // update UI
+        Vector2 dimensions = batteryFillUI.rectTransform.sizeDelta;
+        dimensions.x = batteryLevel;
+        batteryFillUI.rectTransform.sizeDelta = dimensions;
     }
 }
