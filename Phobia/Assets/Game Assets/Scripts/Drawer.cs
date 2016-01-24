@@ -5,7 +5,6 @@ using System;
 public class Drawer : Interactable
 {
     bool m_open = false;
-    float m_Range = 10f;
     public AudioClip m_AudioOpen;
     public AudioClip m_AudioClose;
     AudioSource cached_AS;
@@ -73,10 +72,5 @@ public class Drawer : Interactable
             //transform.position += transform.forward * 1.3f;
             m_open = true;
         }
-    }
-
-    public override float getActivationRange()
-    {
-        return m_Range;
     }
 }
