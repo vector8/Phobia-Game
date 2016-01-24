@@ -4,7 +4,7 @@ using System;
 
 public abstract class Interactable : MonoBehaviour
 {
-    public const float STANDARD_ACTIVATION_RANGE = 5f;
+    public const float STANDARD_ACTIVATION_RANGE = 10f;
 
     public abstract void activate();
 

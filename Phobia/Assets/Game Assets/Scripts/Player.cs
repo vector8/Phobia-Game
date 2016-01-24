@@ -1,18 +1,19 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 
 public class Player : MonoBehaviour
 {
     public Transform controllerToFollow;
 
-    public const float MAX_BATTERY_LEVEL = 73f;
-    public const float RELOAD_TIME = 3f;
+    public float MAX_BATTERY_LEVEL = 100f;
+    public float BATTERY_RELOAD_TIME = 3f;
+    public float BATTERY_RELOAD_AMOUNT = 35f;
 
     public float batteryLevel;
     public float batteryDrainRate = 1f;
-    public Image batteryFillUI;
-    public Image batteryOutlineUI;
+    public SpriteRenderer batteryFillUI;
+    public SpriteRenderer batteryOutlineUI;
+    public GameObject batteryFillScalePivot;
     public Light hydraFlashlight;
     public Light mouseFlashlight;
     public FlashlightController flashlightController;
@@ -29,6 +30,8 @@ public class Player : MonoBehaviour
     private bool reloading = false;
     private float reloadTimer = 0f;
 
+    private NumberDisplayController batteryNumberUI;
+
     // Use this for initialization
     void Start()
     {
@@ -44,6 +47,9 @@ public class Player : MonoBehaviour
         controllerToFollow = temp.transform;
 
         batteryLevel = MAX_BATTERY_LEVEL;
+
+        GameObject batteryNumberGO = GameObject.Find("BatteryNumberDisplay");
+        batteryNumberUI = batteryNumberGO.GetComponent<NumberDisplayController>();
     }
 
     // Update is called once per frame
@@ -149,18 +155,19 @@ public class Player : MonoBehaviour
             // reloading animation and increment reload timer
             reloadTimer += Time.deltaTime;
 
-            if(reloadTimer >= RELOAD_TIME)
+            if(reloadTimer >= BATTERY_RELOAD_TIME)
             {
-                numberOfBatteries--;
-                batteryLevel += 25;
+                decrementBatteryCount();
+                batteryLevel += BATTERY_RELOAD_AMOUNT;
                 reloadTimer = 0f;
                 reloading = false;
                 flashlight.gameObject.SetActive(flashlightOn);
                 updateBatteryUI();
             }
         }
-        else if(numberOfBatteries > 0 &&  batteryLevel < 48f && // TODO: figure out which button is appropriate here
+        else if(numberOfBatteries > 0 &&  batteryLevel < MAX_BATTERY_LEVEL - BATTERY_RELOAD_AMOUNT && 
             ((usingHydra && flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (!usingHydra && Input.GetKeyDown(KeyCode.R))))
+                                        // TODO: figure out which button is appropriate for hydra
         {
             // reload
             reloading = true;
@@ -171,8 +178,20 @@ public class Player : MonoBehaviour
     private void updateBatteryUI()
     {
         // update UI
-        Vector2 dimensions = batteryFillUI.rectTransform.sizeDelta;
-        dimensions.x = batteryLevel;
-        batteryFillUI.rectTransform.sizeDelta = dimensions;
+        Vector3 scale = batteryFillScalePivot.transform.localScale;
+        scale.x = batteryLevel / MAX_BATTERY_LEVEL;
+        batteryFillScalePivot.transform.localScale = scale;
+    }
+
+    public void incrementBatteryCount()
+    {
+        numberOfBatteries++;
+        batteryNumberUI.setNumber(numberOfBatteries);
+    }
+
+    public void decrementBatteryCount()
+    {
+        numberOfBatteries--;
+        batteryNumberUI.setNumber(numberOfBatteries);
     }
 }

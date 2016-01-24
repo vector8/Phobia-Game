@@ -14,7 +14,14 @@ public class Battery : Interactable
 
     public override void activate()
     {
-        player.numberOfBatteries++;
-        Destroy(gameObject);
+        if(player.numberOfBatteries < 9)
+        {
+            player.incrementBatteryCount();
+            Destroy(gameObject);
+        }
+        else
+        {
+            // TODO: tell the player that they cant hold anymore batteries.
+        }
     }
 }
