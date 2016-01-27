@@ -8,6 +8,7 @@ public class Door : Interactable
     public float MAX_TIME;
     public Transform rotatePoint;
     public float openAngle = 90.0f;
+    public Vector3 rotateAxis = new Vector3(0f, 1f, 0f);
 
     private bool open = false;
     private float timer = 0.0f;
@@ -27,19 +28,19 @@ public class Door : Interactable
                 timer = 0f;
             }
 
-            float yAngle;
+            float angle;
             if (open)
             {
-                yAngle = Mathf.Lerp(0, openAngle, u);
+                angle = Mathf.Lerp(0, openAngle, u);
             }
             else
             {
-                yAngle = Mathf.Lerp(openAngle, 0, u);
+                angle = Mathf.Lerp(openAngle, 0, u);
             }
 
-            Vector3 euler = rotatePoint.localEulerAngles;
-            euler.y = yAngle;
-            rotatePoint.localEulerAngles = euler;
+            //Vector3 euler = rotatePoint.localEulerAngles;
+            //euler.y = yAngle;
+            rotatePoint.localEulerAngles = angle * rotateAxis;
         }
     }
 
