@@ -4,23 +4,25 @@ using System;
 
 public class Drawer : Interactable
 {
-    bool m_open = false;
     public AudioClip m_AudioOpen;
     public AudioClip m_AudioClose;
-    AudioSource cached_AS;
-    float m_Timer;
-    bool m_Activated = false;
-    float m_LerpTime;
     public float m_TotalTime;
-    Vector3 m_OpenPosition;
-    Vector3 m_ClosedPosition;
+
+    private bool m_open = false;
+    private AudioSource cached_AS;
+    private float m_Timer;
+    private bool m_Activated = false;
+    private float m_LerpTime;
+    private Vector3 m_OpenPosition;
+    private Vector3 m_ClosedPosition;
+
     // Use this for initialization
     void Start()
     {
         cached_AS = GetComponent<AudioSource>();
         m_ClosedPosition = transform.localPosition;
-        Vector3 temp = new Vector3(0,0,transform.forward.z * -2.3f);
-        m_OpenPosition = transform.localPosition + temp;
+        m_OpenPosition = transform.localPosition;
+        m_OpenPosition.z = 1.67f;
     }
 
     // Update is called once per frame
