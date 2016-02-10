@@ -10,7 +10,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: f68016e339219b044a59fc2bb3014504, type: 3}
   m_ShaderKeywords: _OVERLAYSRC_ONEMINUSDSTCOLOR _ZTEST_LESS _ZWRITE_ON
   m_LightmapFlags: 5
-  m_CustomRenderQueue: 4500
+  m_CustomRenderQueue: 5000
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -89,24 +89,100 @@ Material:
         second: 0
       data:
         first:
-          name: _Cutoff
-        second: .5
-      data:
-        first:
           name: _Color
         second: 1
       data:
         first:
-          name: _Parallax
-        second: .0199999996
+          name: _Cutoff
+        second: 0.5
+      data:
+        first:
+          name: iterations
+        second: 19.73
+      data:
+        first:
+          name: formuparam
+        second: 0.56
+      data:
+        first:
+          name: volsteps
+        second: 12.16
+      data:
+        first:
+          name: stepsize
+        second: 0.1
+      data:
+        first:
+          name: zoom
+        second: 1.7
+      data:
+        first:
+          name: tile
+        second: 0.83
+      data:
+        first:
+          name: speed
+        second: 0
+      data:
+        first:
+          name: brightness
+        second: 0.002
+      data:
+        first:
+          name: darkmatter
+        second: 0.9
+      data:
+        first:
+          name: distfading
+        second: 0.76
+      data:
+        first:
+          name: saturation
+        second: 0.9
+      data:
+        first:
+          name: _HueShift
+        second: 0.485
+      data:
+        first:
+          name: _Saturation
+        second: 1.12
+      data:
+        first:
+          name: _Lightness
+        second: 0.16
+      data:
+        first:
+          name: startstep
+        second: -8
+      data:
+        first:
+          name: _AspectRatio
+        second: 1
+      data:
+        first:
+          name: _OverlaySrc
+        second: 3
+      data:
+        first:
+          name: _OverlayDst
+        second: 7
+      data:
+        first:
+          name: _ZTest
+        second: 0
       data:
         first:
           name: _ZWrite
         second: 1
       data:
         first:
+          name: _Parallax
+        second: 0.02
+      data:
+        first:
           name: _Glossiness
-        second: .5
+        second: 0.5
       data:
         first:
           name: _BumpScale
@@ -131,82 +207,6 @@ Material:
         first:
           name: _Metallic
         second: 0
-      data:
-        first:
-          name: _ZTest
-        second: 0
-      data:
-        first:
-          name: iterations
-        second: 17
-      data:
-        first:
-          name: formuparam
-        second: .560000002
-      data:
-        first:
-          name: volsteps
-        second: 20
-      data:
-        first:
-          name: stepsize
-        second: .100000001
-      data:
-        first:
-          name: zoom
-        second: 2
-      data:
-        first:
-          name: tile
-        second: .829999983
-      data:
-        first:
-          name: speed
-        second: .000199999995
-      data:
-        first:
-          name: brightness
-        second: .00499999989
-      data:
-        first:
-          name: darkmatter
-        second: .300000012
-      data:
-        first:
-          name: distfading
-        second: .730000019
-      data:
-        first:
-          name: saturation
-        second: .850000024
-      data:
-        first:
-          name: _HueShift
-        second: 0
-      data:
-        first:
-          name: _Saturation
-        second: .680000007
-      data:
-        first:
-          name: _Lightness
-        second: .189999998
-      data:
-        first:
-          name: startstep
-        second: 0
-      data:
-        first:
-          name: _AspectRatio
-        second: 1
-      data:
-        first:
-          name: _OverlaySrc
-        second: 3
-      data:
-        first:
-          name: _OverlayDst
-        second: 7
     m_Colors:
       data:
         first:
@@ -215,8 +215,8 @@ Material:
       data:
         first:
           name: _Color
-        second: {r: .411764681, g: .586206853, b: 1, a: 1}
+        second: {r: 0.41176468, g: 0.58620685, b: 1, a: 1}
       data:
         first:
           name: position2D
-        second: {r: 0, g: 0, b: 0, a: .100000001}
+        second: {r: 0, g: 0, b: 0.1, a: 0.1}

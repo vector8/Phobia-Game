@@ -64,7 +64,7 @@ public class CustomStarInspector : MaterialEditor
         targetMat.SetFloat("tile", tile);
         targetMat.SetFloat("brightness", brightness);
         targetMat.SetFloat("darkmatter", darkmatter);
-        targetMat.SetFloat("distFading", distfading);
+        targetMat.SetFloat("distfading", distfading);
         targetMat.SetFloat("saturation", saturation);
 
         float h = targetMat.GetFloat("_HueShift");

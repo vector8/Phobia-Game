@@ -45,7 +45,8 @@
 		Lighting Off
 
 		Blend Off
-		ZWrite On
+		// Blend One One
+		ZWrite Off
 		ZTest LEqual
 		
 		Pass
@@ -158,7 +159,7 @@
 				uv = (uv - 0.5) * 2.0;
 				uv.x *= _AspectRatio;
 			
-				uv = rotate(uv, position2D.z);
+				uv = rotate(uv, position2D.z * _Time.y * (3.1415 / 180.0));
 			
 				float3 dir = float3(uv.x * zoom, uv.y * zoom, 1.0);
 				float time = _Time.y * speed + 0.25;
@@ -215,7 +216,7 @@
 					{
 						fade *= 1.0 - dm; // Dark matter, don't render near
 					}
-					// v += float3(dm, dm * 0.5, 0.0);
+					v += float3(dm, dm * 0.5, 0.0);
 					v += fade;
 					v += float3(s, s * s, s * s * s * s) * a * brightness * fade; // Coloring based on distance
 					fade *= distfading; // Distance fading
