@@ -50,6 +50,13 @@ public class Player : MonoBehaviour
 
         GameObject batteryNumberGO = GameObject.Find("BatteryNumberDisplay");
         batteryNumberUI = batteryNumberGO.GetComponent<NumberDisplayController>();
+
+        // Disable mouse cursor if this is a build
+#if UNITY_EDITOR
+        Cursor.visible = true;
+#elif UNITY_STANDALONE
+        Cursor.visible = false;
+#endif
     }
 
     // Update is called once per frame
