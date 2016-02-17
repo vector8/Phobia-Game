@@ -50,6 +50,30 @@ public class MonsterController : MonoBehaviour
 
             Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
 
+            if (Mathf.Approximately(direction.sqrMagnitude, 0))
+            {
+                // try to get scroll info based on mouse position
+                Vector3 mPos = Input.mousePosition;
+                float marginX = 0.05f * Camera.main.pixelWidth, marginY = 0.05f * Camera.main.pixelHeight;
+                if(mPos.x < marginX)
+                {
+                    direction.x = -1f;
+                }
+                else if(mPos.x > (Camera.main.pixelWidth - marginX))
+                {
+                    direction.x = 1f;
+                }
+
+                if (mPos.y < marginY)
+                {
+                    direction.z = -1f;
+                }
+                else if (mPos.y > (Camera.main.pixelHeight - marginY))
+                {
+                    direction.z = 1f;
+                }
+            }
+
             if (!Mathf.Approximately(direction.sqrMagnitude, 0))
             {
                 direction.Normalize();
@@ -57,7 +81,6 @@ public class MonsterController : MonoBehaviour
                 Vector3 pos = topDownCam.transform.position;
                 float u = (topDownCam.orthographicSize - MIN_ORTHO_SIZE) / ORTHO_SIZE_DIFF;
                 float tempSpeed = Mathf.Lerp(MIN_ORTHO_SPEED_MULTIPLIER, MAX_ORTHO_SPEED_MULTIPLIER, u) * topDownCam.orthographicSize;
-                print(tempSpeed);
                 pos -= direction * scrollSpeedMultiplier * Time.deltaTime * tempSpeed;
                 topDownCam.transform.position = pos;
             }
