@@ -9,12 +9,15 @@ public class Battery : Interactable
     void Start()
     {
         GameObject playerGO = GameObject.Find("Player");
-        player = playerGO.GetComponent<Player>();
+        if(playerGO != null)
+        {
+            player = playerGO.GetComponent<Player>();
+        }
     }
 
     public override void activate()
     {
-        if(player.numberOfBatteries < 9)
+        if(player != null && player.numberOfBatteries < 9)
         {
             player.incrementBatteryCount();
             Destroy(gameObject);
