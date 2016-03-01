@@ -3,7 +3,11 @@ using System.Collections;
 
 public class Player : MonoBehaviour
 {
-    public Transform controllerToFollow;
+    public bool usingHydra;
+    public GameObject mouseController;
+    public GameObject hydraController;
+    public NumberDisplayController mouseBatteryUI;
+    public NumberDisplayController hydraBatteryUI;
 
     public float MAX_BATTERY_LEVEL = 100f;
     public float BATTERY_RELOAD_TIME = 3f;
@@ -21,7 +25,7 @@ public class Player : MonoBehaviour
     public bool useFlashlightBatteryDimming = false;
     public int numberOfBatteries = 0;
 
-    private bool usingHydra = true;
+    private Transform controllerToFollow;
     private Light flashlight;
     private float batteryFlashTimer;
     private const float BATTERY_FLASH_DURATION = 0.5f;
@@ -35,21 +39,22 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        flashlight = hydraFlashlight;
-        GameObject temp = GameObject.Find("HydraController");
-        if(temp == null)
+        if(usingHydra)
         {
-            temp = GameObject.Find("MouseController");
-            usingHydra = false;
+            mouseController.SetActive(false);
+            flashlight = hydraFlashlight;
+            controllerToFollow = hydraController.transform;
+            batteryNumberUI = hydraBatteryUI;
+        }
+        else
+        {
+            hydraController.SetActive(false);
             flashlight = mouseFlashlight;
+            controllerToFollow = mouseController.transform;
+            batteryNumberUI = mouseBatteryUI;
         }
 
-        controllerToFollow = temp.transform;
-
         batteryLevel = MAX_BATTERY_LEVEL;
-
-        GameObject batteryNumberGO = GameObject.Find("BatteryNumberDisplay");
-        batteryNumberUI = batteryNumberGO.GetComponent<NumberDisplayController>();
 
         // Disable mouse cursor if this is a build
 #if UNITY_EDITOR
