@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent (typeof(CitaNet.NetworkedObject))]
 public class FuseBox : Interactable
 {
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
-
+        base.Start();
     }
 
     // Update is called once per frame
@@ -16,8 +17,8 @@ public class FuseBox : Interactable
 
     }
 
-    public override void activate()
+    public override void activate(bool fromNetwork)
     {
-
+        base.activate(fromNetwork);
     }
 }

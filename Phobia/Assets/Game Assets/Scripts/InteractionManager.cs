@@ -6,6 +6,12 @@ public class InteractionManager : MonoBehaviour
     private Interactable target = null;
 
     public GameObject interactionIcon;
+    public Player player;
+
+
+    void Start()
+    {
+    }
 
     // Update is called once per frame
     void Update()
@@ -28,9 +34,22 @@ public class InteractionManager : MonoBehaviour
             }
         }
 
-        if (target != null && Input.GetKeyDown(KeyCode.E))
+
+        if (player.usingHydra)
         {
-            target.activate();
+            SixenseInput.Controller rightController = SixenseInput.GetController(SixenseHands.RIGHT);
+
+            if(target != null && rightController.GetButtonDown(SixenseButtons.TRIGGER))
+            {
+                target.activate(false);
+            }
+        }
+        else
+        {
+            if(target != null && Input.GetKeyDown(KeyCode.E))
+            {
+                target.activate(false);
+            }
         }
     }
 }

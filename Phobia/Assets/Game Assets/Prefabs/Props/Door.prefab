@@ -12,6 +12,7 @@ GameObject:
   - 23: {fileID: 2396406}
   - 65: {fileID: 6544236}
   - 114: {fileID: 11461126}
+  - 114: {fileID: 11493150}
   m_Layer: 0
   m_Name: Door
   m_TagString: Untagged
@@ -87,7 +88,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 165188}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: .0159988403, y: -1.13100004, z: -1.94400001}
+  m_LocalPosition: {x: 0.01599884, y: -1.131, z: -1.944}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 443742}
@@ -99,9 +100,9 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 126910}
-  m_LocalRotation: {x: 0, y: 0, z: .707106829, w: .707106709}
-  m_LocalPosition: {x: 4.5739994, y: 1.72000003, z: 1.94499969}
-  m_LocalScale: {x: .0111225136, y: .0102296704, z: .0114849741}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071067}
+  m_LocalPosition: {x: 4.5739994, y: 1.72, z: 1.9449997}
+  m_LocalScale: {x: 0.011122514, y: 0.01022967, z: 0.011484974}
   m_Children:
   - {fileID: 456202}
   m_Father: {fileID: 433532}
@@ -113,7 +114,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 199604}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.63581467, y: -1, z: 11.3825445}
+  m_LocalPosition: {x: -2.6358147, y: -1, z: 11.3825445}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 443742}
@@ -139,7 +140,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: .5
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
@@ -165,7 +166,7 @@ MeshRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: .5
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
@@ -206,8 +207,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 671.267395, y: 31.4534302, z: 335.028381}
-  m_Center: {x: -167.243774, y: 446.155762, z: 0}
+  m_Size: {x: 671.2674, y: 31.45343, z: 335.02838}
+  m_Center: {x: -167.24377, y: 446.15576, z: 0}
 --- !u!114 &11461126
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -223,6 +224,18 @@ MonoBehaviour:
   rotatePoint: {fileID: 433532}
   openAngle: 120
   rotateAxis: {x: 0, y: 1, z: 0}
+--- !u!114 &11493150
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 126910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkID: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

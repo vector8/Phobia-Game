@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
+using CitaNet;
 
+[RequireComponent (typeof(CitaNet.NetworkedObject))]
 public class Battery : Interactable
 {
     private Player player;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+
         GameObject playerGO = GameObject.Find("Player");
         if(playerGO != null)
         {
@@ -15,8 +17,20 @@ public class Battery : Interactable
         }
     }
 
-    public override void activate()
+    protected override void customNetworkMessageHandler(NetworkMessage msg)
     {
+        bool result;
+        if (msg.getBool("Actvd", out result))
+        {
+            // don't activate here if it was activated remotely, just remove from game
+            Destroy(gameObject);
+        }
+    }
+
+    public override void activate(bool fromNetwork)
+    {
+        base.activate(fromNetwork);
+
         if(player != null && player.numberOfBatteries < 9)
         {
             player.incrementBatteryCount();

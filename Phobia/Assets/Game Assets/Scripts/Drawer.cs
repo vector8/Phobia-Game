@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 
+[RequireComponent (typeof(CitaNet.NetworkedObject))]
 public class Drawer : Interactable
 {
     public AudioClip m_AudioOpen;
@@ -17,8 +18,10 @@ public class Drawer : Interactable
     private Vector3 m_ClosedPosition;
 
     // Use this for initialization
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+
         cached_AS = GetComponent<AudioSource>();
         m_ClosedPosition = transform.localPosition;
         m_OpenPosition = transform.localPosition;
@@ -31,7 +34,6 @@ public class Drawer : Interactable
         if (m_Activated)
         {
             m_Timer += Time.deltaTime;
-
 
             m_LerpTime = m_Timer / m_TotalTime;
 
@@ -50,19 +52,18 @@ public class Drawer : Interactable
                 m_Activated = false;
             }
         }
-
-
     }
 
-    public override void activate()
+    public override void activate(bool fromNetwork)
     {
+        base.activate(fromNetwork);
+
         if (m_open)
         {
             cached_AS.clip = m_AudioClose;
             cached_AS.Play();
             m_Timer = 0.0f;
             m_Activated = true;
-            //transform.position -= transform.forward * 1.3f;
             m_open = false;
         }
         else
@@ -71,7 +72,6 @@ public class Drawer : Interactable
             cached_AS.Play();
             m_Timer = 0.0f;
             m_Activated = true;
-            //transform.position += transform.forward * 1.3f;
             m_open = true;
         }
     }
