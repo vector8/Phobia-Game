@@ -38318,6 +38318,26 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 16afd5b1784cc034a8547a9adb850602, type: 2}
   m_IsPrefabParent: 0
+--- !u!114 &978501709 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 11411326, guid: 16afd5b1784cc034a8547a9adb850602,
+    type: 2}
+  m_PrefabInternal: {fileID: 978501708}
+  m_Script: {fileID: 11500000, guid: c5020d8b3031c0140be2791816b862ff, type: 3}
+--- !u!1 &978501710 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 193690, guid: 16afd5b1784cc034a8547a9adb850602, type: 2}
+  m_PrefabInternal: {fileID: 978501708}
+--- !u!212 &978501711 stripped
+SpriteRenderer:
+  m_PrefabParentObject: {fileID: 21248914, guid: 16afd5b1784cc034a8547a9adb850602,
+    type: 2}
+  m_PrefabInternal: {fileID: 978501708}
+--- !u!212 &978501712 stripped
+SpriteRenderer:
+  m_PrefabParentObject: {fileID: 21234058, guid: 16afd5b1784cc034a8547a9adb850602,
+    type: 2}
+  m_PrefabInternal: {fileID: 978501708}
 --- !u!1001 &979508712
 Prefab:
   m_ObjectHideFlags: 0
@@ -55818,6 +55838,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6314f47b97c4f52459bf631bc8fb3a99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mouseElements:
+    controller: {fileID: 934604709}
+    batteryNumberUI: {fileID: 1394083410}
+    batteryFillUI: {fileID: 978501712}
+    batteryOutlineUI: {fileID: 978501711}
+    batteryFillScalePivot: {fileID: 978501710}
+    flashlight: {fileID: 2070962077}
+    flashlightController: {fileID: 978501709}
+    handUI: {fileID: 1213240442}
+  hydraElements:
+    controller: {fileID: 1722628046}
+    batteryNumberUI: {fileID: 1213187521}
+    batteryFillUI: {fileID: 1759324630}
+    batteryOutlineUI: {fileID: 466820701}
+    batteryFillScalePivot: {fileID: 1893831050}
+    flashlight: {fileID: 1439125826}
+    flashlightController: {fileID: 1552495214}
+    handUI: {fileID: 555083276}
   usingHydra: 0
   mouseController: {fileID: 934604709}
   hydraController: {fileID: 1722628046}
