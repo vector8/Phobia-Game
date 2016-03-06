@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 
+[RequireComponent (typeof(CitaNet.NetworkedObject))]
 public class Door : Interactable
 {
-
     public float MAX_TIME;
     public Transform rotatePoint;
     public float openAngle = 90.0f;
@@ -13,6 +11,11 @@ public class Door : Interactable
     private bool open = false;
     private float timer = 0.0f;
     private bool activated = false;
+
+    protected override void Start()
+    {
+        base.Start();
+    }
 
     // Update is called once per frame
     void Update()
@@ -44,8 +47,10 @@ public class Door : Interactable
         }
     }
 
-    public override void activate()
+    public override void activate(bool fromNetwork)
     {
+        base.activate(fromNetwork);
+
         if (open)
         {
             timer = 0.0f;

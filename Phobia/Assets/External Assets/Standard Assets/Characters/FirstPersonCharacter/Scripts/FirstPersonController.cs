@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
+using CitaNet;
 
 namespace UnityStandardAssets.Characters.FirstPerson
 {
@@ -42,6 +43,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_Jumping;
         private AudioSource m_AudioSource;
 
+        // networking stuff
+        private NetworkedObject netObj;
+        private Vector3 oldPos;
+        //private float oldRotY;
+        //private float oldRotX;
+
         // Use this for initialization
         private void Start()
         {
@@ -54,13 +61,54 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_NextStep = m_StepCycle/2f;
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
-			m_MouseLook.Init(transform , m_Camera.transform);
+			m_MouseLook.Init(transform , m_Camera.transform); netObj = GetComponent<NetworkedObject>();
+            netObj.customNetworkMessageFunc = customizeNetworkMessage;
+            netObj.customNetworkMessageHandler = customNetworkMessageHandler;
+            oldPos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+            //oldRotY = transform.rotation.eulerAngles.y;
+            //oldRotX = m_Camera.transform.rotation.eulerAngles.x;
+        }
+
+        private void customizeNetworkMessage(ref NetworkMessage msg)
+        {
+            msg.setFloat("PosX", transform.position.x);
+            msg.setFloat("PosY", transform.position.y);
+            msg.setFloat("PosZ", transform.position.z);
+            //msg.setFloat("RotX", m_Camera.transform.rotation.eulerAngles.x);
+            //msg.setFloat("RotY", transform.rotation.eulerAngles.y);
+        }
+
+        private void customNetworkMessageHandler(NetworkMessage msg)
+        {
+            float xPos, yPos, zPos;//, xRot, yRot;
+
+            msg.getFloat("PosX", out xPos);
+            msg.getFloat("PosY", out yPos);
+            msg.getFloat("PosZ", out zPos);
+            //msg.getFloat("RotX", out xRot);
+            //msg.getFloat("RotY", out yRot);
+
+            transform.position = new Vector3(xPos, yPos, zPos);
+
+            //Vector3 euler = transform.rotation.eulerAngles;
+            //euler.y = yRot;
+            //transform.rotation = Quaternion.Euler(euler);
+
+            //euler = m_Camera.transform.rotation.eulerAngles;
+            //euler.x = xRot;
+            //m_Camera.transform.rotation = Quaternion.Euler(euler);
+
+            // update old values
+            oldPos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+            //oldRotY = transform.rotation.eulerAngles.y;
+            //oldRotX = m_Camera.transform.rotation.eulerAngles.x;
         }
 
 
         // Update is called once per frame
         private void Update()
         {
+
             RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
@@ -81,6 +129,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
 
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
+
+            if (oldPos != transform.position)// || !Mathf.Approximately(oldRotY, transform.rotation.eulerAngles.y) || !Mathf.Approximately(oldRotX, m_Camera.transform.rotation.eulerAngles.x))
+            {
+                // send a network update
+                netObj.sendNetworkUpdate();
+
+                oldPos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                //oldRotY = transform.rotation.eulerAngles.y;
+                //oldRotX = m_Camera.transform.rotation.eulerAngles.x;
+            }
         }
 
 
