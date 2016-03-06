@@ -13,6 +13,8 @@ public class Player : MonoBehaviour
         public Light flashlight;
         public FlashlightController flashlightController;
         public GameObject handUI;
+        public GameObject fuseUI;
+        public NumberDisplayController fuseNumberUI;
     }
 
     public ControllerElements mouseElements, hydraElements;
@@ -22,13 +24,14 @@ public class Player : MonoBehaviour
 
     public float MAX_BATTERY_LEVEL = 100f;
     public float BATTERY_RELOAD_TIME = 3f;
-    public float BATTERY_RELOAD_AMOUNT = 35f;
+    public float BATTERY_RELOAD_AMOUNT = 50f;
 
     public float batteryLevel;
     public float batteryDrainRate = 1f;
     public bool flashlightOn = true;
     public bool useFlashlightBatteryDimming = false;
     public int numberOfBatteries = 0;
+    public int numberOfFuses = 0;
 
     private Transform controllerToFollow;
     private float batteryFlashTimer;
@@ -205,5 +208,26 @@ public class Player : MonoBehaviour
     {
         numberOfBatteries--;
         controllerElements.batteryNumberUI.setNumber(numberOfBatteries);
+    }
+
+    public void incrementFuseCount()
+    {
+        numberOfFuses++;
+        controllerElements.fuseNumberUI.setNumber(numberOfFuses);
+        controllerElements.fuseUI.SetActive(numberOfFuses > 0);
+    }
+
+    public void decrementFuseCount()
+    {
+        numberOfFuses--;
+        controllerElements.fuseNumberUI.setNumber(numberOfFuses);
+        controllerElements.fuseUI.SetActive(numberOfFuses > 0);
+    }
+
+    public void setFuseCount(int count)
+    {
+        numberOfFuses = count;
+        controllerElements.fuseNumberUI.setNumber(numberOfFuses);
+        controllerElements.fuseUI.SetActive(numberOfFuses > 0);
     }
 }
