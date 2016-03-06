@@ -5,13 +5,7 @@ public class InteractionManager : MonoBehaviour
 {
     private Interactable target = null;
 
-    public GameObject interactionIcon;
     public Player player;
-
-
-    void Start()
-    {
-    }
 
     // Update is called once per frame
     void Update()
@@ -25,12 +19,12 @@ public class InteractionManager : MonoBehaviour
             if (i != null && Vector3.Distance(this.transform.position, hit.point) < i.getActivationRange())
             {
                 target = i;
-                interactionIcon.SetActive(true);
+                player.controllerElements.handUI.SetActive(true);
             }
             else
             {
                 target = null;
-                interactionIcon.SetActive(false);
+                player.controllerElements.handUI.SetActive(false);
             }
         }
 

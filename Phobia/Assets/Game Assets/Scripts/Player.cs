@@ -3,11 +3,22 @@ using System.Collections;
 
 public class Player : MonoBehaviour
 {
+    [System.Serializable]
+    public struct ControllerElements
+    {
+        public GameObject controller;
+        public NumberDisplayController batteryNumberUI;
+        public SpriteRenderer batteryFillUI, batteryOutlineUI;
+        public GameObject batteryFillScalePivot;
+        public Light flashlight;
+        public FlashlightController flashlightController;
+        public GameObject handUI;
+    }
+
+    public ControllerElements mouseElements, hydraElements;
+    public ControllerElements controllerElements;
+
     public bool usingHydra;
-    public GameObject mouseController;
-    public GameObject hydraController;
-    public NumberDisplayController mouseBatteryUI;
-    public NumberDisplayController hydraBatteryUI;
 
     public float MAX_BATTERY_LEVEL = 100f;
     public float BATTERY_RELOAD_TIME = 3f;
@@ -15,18 +26,11 @@ public class Player : MonoBehaviour
 
     public float batteryLevel;
     public float batteryDrainRate = 1f;
-    public SpriteRenderer batteryFillUI;
-    public SpriteRenderer batteryOutlineUI;
-    public GameObject batteryFillScalePivot;
-    public Light hydraFlashlight;
-    public Light mouseFlashlight;
-    public FlashlightController flashlightController;
     public bool flashlightOn = true;
     public bool useFlashlightBatteryDimming = false;
     public int numberOfBatteries = 0;
 
     private Transform controllerToFollow;
-    private Light flashlight;
     private float batteryFlashTimer;
     private const float BATTERY_FLASH_DURATION = 0.5f;
     private bool batteryRed = false;
@@ -34,24 +38,20 @@ public class Player : MonoBehaviour
     private bool reloading = false;
     private float reloadTimer = 0f;
 
-    private NumberDisplayController batteryNumberUI;
-
     // Use this for initialization
     void Start()
     {
         if(usingHydra)
         {
-            mouseController.SetActive(false);
-            flashlight = hydraFlashlight;
-            controllerToFollow = hydraController.transform;
-            batteryNumberUI = hydraBatteryUI;
+            controllerElements = hydraElements;
+            mouseElements.controller.SetActive(false);
+            controllerToFollow = controllerElements.controller.transform;
         }
         else
         {
-            hydraController.SetActive(false);
-            flashlight = mouseFlashlight;
-            controllerToFollow = mouseController.transform;
-            batteryNumberUI = mouseBatteryUI;
+            controllerElements = mouseElements;
+            hydraElements.controller.SetActive(false);
+            controllerToFollow = controllerElements.controller.transform;
         }
 
         batteryLevel = MAX_BATTERY_LEVEL;
@@ -83,11 +83,11 @@ public class Player : MonoBehaviour
         if(batteryLevel > 0f)
         {
             // If flashlight button has been pressed
-            if((usingHydra && flashlightController.m_controller.GetButtonDown(SixenseButtons.TWO)) || (!usingHydra && Input.GetKeyDown(KeyCode.Q)))
+            if((usingHydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.TWO)) || (!usingHydra && Input.GetKeyDown(KeyCode.Q)))
             {
                 // Toggle flashlight
                 flashlightOn = !flashlightOn;
-                flashlight.gameObject.SetActive(flashlightOn);
+                controllerElements.flashlight.gameObject.SetActive(flashlightOn);
             }
 
             if(flashlightOn)
@@ -100,7 +100,7 @@ public class Player : MonoBehaviour
         else
         {
             batteryLevel = 0f;
-            flashlight.gameObject.SetActive(false);
+            controllerElements.flashlight.gameObject.SetActive(false);
             flashlightOn = false;
         }
 
@@ -114,19 +114,19 @@ public class Player : MonoBehaviour
                 
                 if(batteryRed)
                 {
-                    batteryOutlineUI.color = Color.red;
-                    batteryFillUI.color = Color.red;
+                    controllerElements.batteryOutlineUI.color = Color.red;
+                    controllerElements.batteryFillUI.color = Color.red;
                 }
                 else
                 {
-                    batteryOutlineUI.color = Color.white;
-                    batteryFillUI.color = Color.white;
+                    controllerElements.batteryOutlineUI.color = Color.white;
+                    controllerElements.batteryFillUI.color = Color.white;
                 }
             }
 
             if (useFlashlightBatteryDimming)
             {
-                flashlight.intensity = (batteryLevel / 20f) * 2f;
+                controllerElements.flashlight.intensity = (batteryLevel / 20f) * 2f;
             }
 
             if(flashlightOn && batteryLevel <= 10f)
@@ -136,9 +136,9 @@ public class Player : MonoBehaviour
                 // flicker effect.
                 if(batteryFlickerTimer <= 0f)
                 {
-                    flashlight.gameObject.SetActive(!flashlight.gameObject.activeSelf);
+                    controllerElements.flashlight.gameObject.SetActive(!controllerElements.flashlight.gameObject.activeSelf);
                     float timeFactor = batteryLevel / 10f;
-                    if(flashlight.gameObject.activeSelf)
+                    if(controllerElements.flashlight.gameObject.activeSelf)
                     {
                         batteryFlickerTimer = timeFactor * Random.Range(0.5f, 1.5f);
                     }
@@ -152,11 +152,11 @@ public class Player : MonoBehaviour
         else
         {
             batteryRed = false;
-            batteryFillUI.color = Color.white;
-            batteryOutlineUI.color = Color.white;
+            controllerElements.batteryFillUI.color = Color.white;
+            controllerElements.batteryOutlineUI.color = Color.white;
             batteryFlashTimer = 0f;
-            flashlight.intensity = 2f;
-            flashlight.gameObject.SetActive(flashlightOn && batteryLevel > 0f);
+            controllerElements.flashlight.intensity = 2f;
+            controllerElements.flashlight.gameObject.SetActive(flashlightOn && batteryLevel > 0f);
         }
     }
 
@@ -173,37 +173,37 @@ public class Player : MonoBehaviour
                 batteryLevel += BATTERY_RELOAD_AMOUNT;
                 reloadTimer = 0f;
                 reloading = false;
-                flashlight.gameObject.SetActive(flashlightOn);
+                controllerElements.flashlight.gameObject.SetActive(flashlightOn);
                 updateBatteryUI();
             }
         }
         else if(numberOfBatteries > 0 &&  batteryLevel < MAX_BATTERY_LEVEL - BATTERY_RELOAD_AMOUNT && 
-            ((usingHydra && flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (!usingHydra && Input.GetKeyDown(KeyCode.R))))
+            ((usingHydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (!usingHydra && Input.GetKeyDown(KeyCode.R))))
                                         // TODO: figure out which button is appropriate for hydra
         {
             // reload
             reloading = true;
-            flashlight.gameObject.SetActive(false);
+            controllerElements.flashlight.gameObject.SetActive(false);
         }
     }
 
     private void updateBatteryUI()
     {
         // update UI
-        Vector3 scale = batteryFillScalePivot.transform.localScale;
+        Vector3 scale = controllerElements.batteryFillScalePivot.transform.localScale;
         scale.x = batteryLevel / MAX_BATTERY_LEVEL;
-        batteryFillScalePivot.transform.localScale = scale;
+        controllerElements.batteryFillScalePivot.transform.localScale = scale;
     }
 
     public void incrementBatteryCount()
     {
         numberOfBatteries++;
-        batteryNumberUI.setNumber(numberOfBatteries);
+        controllerElements.batteryNumberUI.setNumber(numberOfBatteries);
     }
 
     public void decrementBatteryCount()
     {
         numberOfBatteries--;
-        batteryNumberUI.setNumber(numberOfBatteries);
+        controllerElements.batteryNumberUI.setNumber(numberOfBatteries);
     }
 }
