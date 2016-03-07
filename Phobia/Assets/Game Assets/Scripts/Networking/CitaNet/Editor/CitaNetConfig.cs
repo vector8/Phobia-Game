@@ -14,14 +14,17 @@ public class CitaNetConfig : EditorWindow
     {
         if (GUILayout.Button("Assign Network IDs"))
         {
-            NetworkedObject[] netObjs = FindObjectsOfType<NetworkedObject>();
+            NetworkedObject[] netObjs = Resources.FindObjectsOfTypeAll<NetworkedObject>();
             Undo.RecordObjects(netObjs, "Assign Network IDs");
 
             int currentID = 0;
             foreach(NetworkedObject n in netObjs)
             {
-                n.networkID = currentID;
-                currentID++;
+                if(!EditorUtility.IsPersistent(n.gameObject))
+                {
+                    n.networkID = currentID;
+                    currentID++;
+                }
             }
         }
     }
