@@ -51,20 +51,6 @@ namespace CitaNet
                     }
                 }
             }
-            else
-            {
-                // temp code
-                if(Input.GetKeyDown(KeyCode.Period))
-                {
-                    //initialize as server
-                    initAsServer(8888);
-                }
-                else if(Input.GetKeyDown(KeyCode.Comma))
-                {
-                    // init as client instead
-                    initAsClient(8888, "127.0.0.1");
-                }
-            }
         }
 
         public void registerNetworkedObject(GameObject gObj, NetworkedObject netObj)

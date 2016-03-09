@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using CitaNet;
 
 public class MonsterController : MonoBehaviour
 {
@@ -18,12 +19,23 @@ public class MonsterController : MonoBehaviour
         public GameObject prefab;
     }
 
+    public enum MonsterNetworkMessageType
+    {
+        SoundSpawned = 0,
+        TrapSpawned,
+        MorphSpawned,
+        MorphDespawned,
+        MorphMoved
+    }
+
     public Camera topDownCam, transitionCam;
-    public GameObject topDownParent, fpsParent;
+    public GameObject topDownParent, fpsParent, monsterLight;
     public GameObject firstPersonController, interactionIcon;
     public float scrollSpeedMultiplier = 1f;
     public MonsterAbilities currentAbility = MonsterAbilities.None;
     public bool isFirstPerson = false;
+    public bool isLocal;
+    public float networkUpdateDelay;
 
     public StringPrefabDictEntry[] monsterSpawnPrefabs;
     public Dictionary<string, GameObject> monsterSpawnPrefabsDict;
@@ -38,6 +50,84 @@ public class MonsterController : MonoBehaviour
     private Transform origin, target;
     private Interactable targetInteractable = null;
 
+    // networking
+    private NetworkedObject netObj;
+    private float networkUpdateTimer = 0f;
+    private NetworkMessage networkMessageToSend;
+    private GameObject remoteMorphSpawned = null;
+
+    private void customizeNetworkMessage(ref NetworkMessage msg)
+    {
+        msg = networkMessageToSend;
+    }
+
+    private void customNetworkMessageHandler(NetworkMessage msg)
+    {
+        int msgType;
+        msg.getInt("Type", out msgType);
+
+        MonsterNetworkMessageType type = (MonsterNetworkMessageType)msgType;
+
+        string name;
+        msg.getString("Name", out name);
+        Vector3 position = new Vector3();
+        msg.getFloat("PosX", out position.x);
+        msg.getFloat("PosY", out position.y);
+        msg.getFloat("PosZ", out position.z);
+
+        switch (type)
+        {
+            case MonsterNetworkMessageType.SoundSpawned:
+                GameObject sound = Instantiate(monsterSpawnPrefabsDict[name]);
+                sound.transform.position = position;
+                break;
+            case MonsterNetworkMessageType.TrapSpawned:
+                GameObject trap = Instantiate(monsterSpawnPrefabsDict[name]);
+                trap.transform.position = position;
+                break;
+            case MonsterNetworkMessageType.MorphSpawned:
+                remoteMorphSpawned = Instantiate(monsterSpawnPrefabsDict[name]);
+                remoteMorphSpawned.transform.position = position;
+                break;
+            case MonsterNetworkMessageType.MorphDespawned:
+                if (remoteMorphSpawned != null)
+                {
+                    Destroy(remoteMorphSpawned);
+                }
+                break;
+            case MonsterNetworkMessageType.MorphMoved:
+                if (remoteMorphSpawned != null)
+                {
+                    remoteMorphSpawned.transform.position = position;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void buildNetworkMessage(MonsterNetworkMessageType type, string nameOfSpawn = "", Vector3 position = new Vector3(), Vector3 orientation = new Vector3())
+    {
+        networkMessageToSend = new NetworkMessage();
+        networkMessageToSend.setInt(NetworkedObject.INSTANCE_ID_KEY, netObj.networkID);
+        networkMessageToSend.setInt("Type", (int)type);
+        networkMessageToSend.setString("Name", nameOfSpawn);
+        networkMessageToSend.setFloat("PosX", position.x);
+        networkMessageToSend.setFloat("PosY", position.y);
+        networkMessageToSend.setFloat("PosZ", position.z);
+    }
+
+    public void setLocal(bool local)
+    {
+        isLocal = local;
+
+        if (!isLocal)
+        {
+            topDownParent.SetActive(false);
+            fpsParent.SetActive(false);
+            monsterLight.SetActive(false);
+        }
+    }
 
     // Use this for initialization
     void Start()
@@ -47,10 +137,23 @@ public class MonsterController : MonoBehaviour
         {
             monsterSpawnPrefabsDict.Add(e.name, e.prefab);
         }
+
+        // init network stuff
+        netObj = GetComponent<NetworkedObject>();
+        netObj.customNetworkMessageFunc = customizeNetworkMessage;
+        netObj.customNetworkMessageHandler = customNetworkMessageHandler;
     }
 
     // Update is called once per frame
     void Update()
+    {
+        if (isLocal)
+        {
+            updateLocal();
+        }
+    }
+
+    private void updateLocal()
     {
         if (transitioning)
         {
@@ -98,8 +201,7 @@ public class MonsterController : MonoBehaviour
                     direction.z = 1f;
                 }
             }
-
-            if (!Mathf.Approximately(direction.sqrMagnitude, 0))
+            else
             {
                 direction.Normalize();
 
@@ -126,19 +228,25 @@ public class MonsterController : MonoBehaviour
                         {
                             GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["PopGoesTheWeasel"]);
                             go.transform.position = placementPosition;
+
+                            buildNetworkMessage(MonsterNetworkMessageType.SoundSpawned, "PopGoesTheWeasel", placementPosition);
+                            netObj.sendNetworkUpdate();
                         }
                         break;
                     case MonsterAbilities.Trap:
                         {
                             GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["JackInTheBox"]);
                             go.transform.position = placementPosition;
+
+                            buildNetworkMessage(MonsterNetworkMessageType.TrapSpawned, "JackInTheBox", placementPosition);
+                            netObj.sendNetworkUpdate();
                         }
                         break;
                     case MonsterAbilities.Morph:
                         transitionCam.transform.position = topDownCam.transform.position;
                         transitionCam.transform.rotation = topDownCam.transform.rotation;
                         transitioning = true;
-                        firstPersonController.transform.position = placementPosition;
+                        firstPersonController.transform.position = placementPosition + new Vector3(0f, 2.5f, 0f);
                         firstPersonController.transform.rotation = Quaternion.identity;
                         transitionTimer = 0f;
                         origin = topDownCam.transform;
@@ -147,6 +255,8 @@ public class MonsterController : MonoBehaviour
                         transitionCam.gameObject.SetActive(true);
                         topDownParent.SetActive(false);
 
+                        buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
+                        netObj.sendNetworkUpdate();
                         break;
                     default:
                         break;
@@ -155,7 +265,7 @@ public class MonsterController : MonoBehaviour
                 currentAbility = MonsterAbilities.None;
             }
         }
-        else
+        else // isFirstPerson
         {
             if (Input.GetKeyDown(KeyCode.Q)) // OR dead OR timesUp)
             {
@@ -174,30 +284,45 @@ public class MonsterController : MonoBehaviour
 
                 // reset hand UI just in case the monster was aiming at an interactable
                 interactionIcon.SetActive(false);
+
+                buildNetworkMessage(MonsterNetworkMessageType.MorphDespawned);
+                netObj.sendNetworkUpdate();
             }
-
-            // check for interaction
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
-
-            if (Physics.Raycast(ray, out hit))
+            else
             {
-                Interactable i = hit.collider.transform.gameObject.GetComponent<Interactable>();
-                if (i != null && Vector3.Distance(firstPersonController.transform.position, hit.point) < i.getActivationRange())
+                networkUpdateTimer += Time.deltaTime;
+                if (networkUpdateTimer >= networkUpdateDelay)
                 {
-                    targetInteractable = i;
-                    interactionIcon.SetActive(true);
+                    networkUpdateTimer = 0f;
+                    Vector3 pos = firstPersonController.transform.position;
+                    pos.y -= 2.5f; // too slow to get the actual controller's height.. otherwise i need to store it and meh.
+                    buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, "", pos);
+                    netObj.sendNetworkUpdate();
                 }
-                else
-                {
-                    targetInteractable = null;
-                    interactionIcon.SetActive(false);
-                }
-            }
 
-            if (targetInteractable != null && Input.GetKeyDown(KeyCode.E))
-            {
-                targetInteractable.activate(false);
+                // check for interaction
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    Interactable i = hit.collider.transform.gameObject.GetComponent<Interactable>();
+                    if (i != null && Vector3.Distance(firstPersonController.transform.position, hit.point) < i.getActivationRange())
+                    {
+                        targetInteractable = i;
+                        interactionIcon.SetActive(true);
+                    }
+                    else
+                    {
+                        targetInteractable = null;
+                        interactionIcon.SetActive(false);
+                    }
+                }
+
+                if (targetInteractable != null && Input.GetKeyDown(KeyCode.E))
+                {
+                    targetInteractable.activate(false);
+                }
             }
         }
     }

@@ -23979,6 +23979,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 636128917}
   - 114: {fileID: 636128918}
+  - 114: {fileID: 636128919}
   m_Layer: 0
   m_Name: MonsterController
   m_TagString: Untagged
@@ -24026,6 +24027,18 @@ MonoBehaviour:
     prefab: {fileID: 159084, guid: b9c313634a3cf494aa2e25993e70c791, type: 2}
   - name: JackInTheBox
     prefab: {fileID: 112926, guid: 15d7acc7b143a494099fa9134774fb8b, type: 2}
+--- !u!114 &636128919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 636128916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkID: 0
 --- !u!1001 &637606860
 Prefab:
   m_ObjectHideFlags: 0
@@ -24783,9 +24796,9 @@ RectTransform:
   - {fileID: 279913540}
   m_Father: {fileID: 1980284859}
   m_RootOrder: 2
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -47.5, y: -155.1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 301.5, y: 62.899994}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &655804118
@@ -37732,9 +37745,9 @@ RectTransform:
   - {fileID: 1089530537}
   m_Father: {fileID: 1980284859}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -274.09995, y: -155.1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 74.900055, y: 62.899994}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &999800994
@@ -57405,6 +57418,10 @@ Prefab:
       propertyPath: reverbZoneMixCustomCurve.m_RotationOrder
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8200000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 2}
+      propertyPath: spreadCustomCurve.m_RotationOrder
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 2}
   m_IsPrefabParent: 0
@@ -59298,9 +59315,9 @@ RectTransform:
   - {fileID: 1282796646}
   m_Father: {fileID: 1980284859}
   m_RootOrder: 1
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -161.6, y: -155.1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 187.4, y: 62.899994}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1569195543
