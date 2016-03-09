@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using CitaNet;
 
+[RequireComponent(typeof(NetworkedObject))]
 public class Player : MonoBehaviour
 {
     [System.Serializable]
     public struct ControllerElements
     {
-        public GameObject controller;
+        public GameObject controllerGO;
+        public Transform controllerTransform;
         public NumberDisplayController batteryNumberUI;
         public SpriteRenderer batteryFillUI, batteryOutlineUI;
         public GameObject batteryFillScalePivot;
@@ -17,10 +20,21 @@ public class Player : MonoBehaviour
         public NumberDisplayController fuseNumberUI;
     }
 
+    public enum PlayMode
+    {
+        Mouse,
+        Hydra,
+        Remote
+    }
+
     public ControllerElements mouseElements, hydraElements;
     public ControllerElements controllerElements;
+    public GameObject remoteHuman;
 
-    public bool usingHydra;
+    public PlayMode playMode
+    {
+        get; private set;
+    }
 
     public float MAX_BATTERY_LEVEL = 100f;
     public float BATTERY_RELOAD_TIME = 3f;
@@ -32,8 +46,8 @@ public class Player : MonoBehaviour
     public bool useFlashlightBatteryDimming = false;
     public int numberOfBatteries = 0;
     public int numberOfFuses = 0;
+    public float networkUpdateDelay;
 
-    private Transform controllerToFollow;
     private float batteryFlashTimer;
     private const float BATTERY_FLASH_DURATION = 0.5f;
     private bool batteryRed = false;
@@ -41,59 +55,116 @@ public class Player : MonoBehaviour
     private bool reloading = false;
     private float reloadTimer = 0f;
 
+    // networking stuff
+    private NetworkedObject netObj;
+    private float networkUpdateTimer = 0f;
+
     // Use this for initialization
     void Start()
     {
-        if(usingHydra)
-        {
-            controllerElements = hydraElements;
-            mouseElements.controller.SetActive(false);
-            controllerToFollow = controllerElements.controller.transform;
-        }
-        else
-        {
-            controllerElements = mouseElements;
-            hydraElements.controller.SetActive(false);
-            controllerToFollow = controllerElements.controller.transform;
-        }
-
         batteryLevel = MAX_BATTERY_LEVEL;
 
-        // Disable mouse cursor if this is a build
+        // init network stuff
+        netObj = GetComponent<NetworkedObject>();
+        netObj.customNetworkMessageFunc = customizeNetworkMessage;
+        netObj.customNetworkMessageHandler = customNetworkMessageHandler;
+    }
+
+    public void setPlayMode(PlayMode mode)
+    {
+        playMode = mode;
+
+        switch (playMode)
+        {
+            case PlayMode.Mouse:
+                controllerElements = mouseElements;
+                mouseElements.controllerGO.SetActive(true);
+                break;
+            case PlayMode.Hydra:
+                controllerElements = hydraElements;
+                hydraElements.controllerGO.SetActive(true);
+                break;
+            case PlayMode.Remote:
+                remoteHuman.SetActive(true);
+                break;
+            default:
+                break;
+        }
+
+        if(playMode != PlayMode.Remote)
+        {
+            // Disable mouse cursor if this is a build
 #if UNITY_EDITOR
-        Cursor.visible = true;
+            Cursor.visible = true;
 #elif UNITY_STANDALONE
         Cursor.visible = false;
 #endif
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        transform.position = controllerToFollow.position;
-        transform.rotation = controllerToFollow.rotation;
-        transform.localScale = controllerToFollow.localScale;
-
-        checkForReload();
-        if(!reloading)
+        if (playMode != PlayMode.Remote)
         {
-            updateFlashlight();
+            checkForReload();
+            if (!reloading)
+            {
+                updateFlashlight();
+            }
+
+            networkUpdateTimer += Time.deltaTime;
+            if (networkUpdateTimer >= networkUpdateDelay)
+            {
+                networkUpdateTimer = 0f;
+                netObj.sendNetworkUpdate();
+            }
         }
+    }
+
+    private void customizeNetworkMessage(ref NetworkMessage msg)
+    {
+        msg.setFloat("PosX", controllerElements.controllerTransform.position.x);
+        msg.setFloat("PosY", controllerElements.controllerTransform.position.y - 3.3f); // too slow! (controllerElements.controller.GetComponent<CharacterController>().height / 2f));
+        msg.setFloat("PosZ", controllerElements.controllerTransform.position.z);
+        //msg.setFloat("RotX", m_Camera.transform.rotation.eulerAngles.x);
+        //msg.setFloat("RotY", transform.rotation.eulerAngles.y);
+    }
+
+    private void customNetworkMessageHandler(NetworkMessage msg)
+    {
+        float xPos, yPos, zPos;//, xRot, yRot;
+
+        msg.getFloat("PosX", out xPos);
+        msg.getFloat("PosY", out yPos);
+        msg.getFloat("PosZ", out zPos);
+        //msg.getFloat("RotX", out xRot);
+        //msg.getFloat("RotY", out yRot);
+
+        remoteHuman.transform.position = new Vector3(xPos, yPos, zPos);
+
+        //Vector3 euler = transform.rotation.eulerAngles;
+        //euler.y = yRot;
+        //transform.rotation = Quaternion.Euler(euler);
+
+        //euler = m_Camera.transform.rotation.eulerAngles;
+        //euler.x = xRot;
+        //m_Camera.transform.rotation = Quaternion.Euler(euler);
     }
 
     private void updateFlashlight()
     {
-        if(batteryLevel > 0f)
+        if (batteryLevel > 0f)
         {
             // If flashlight button has been pressed
-            if((usingHydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.TWO)) || (!usingHydra && Input.GetKeyDown(KeyCode.Q)))
+            if ((playMode == PlayMode.Hydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.TWO)) || (playMode == PlayMode.Mouse && Input.GetKeyDown(KeyCode.Q)))
             {
                 // Toggle flashlight
                 flashlightOn = !flashlightOn;
                 controllerElements.flashlight.gameObject.SetActive(flashlightOn);
             }
 
-            if(flashlightOn)
+            if (flashlightOn)
             {
                 batteryLevel -= batteryDrainRate * Time.deltaTime;
 
@@ -107,15 +178,15 @@ public class Player : MonoBehaviour
             flashlightOn = false;
         }
 
-        if(batteryLevel < 20f && batteryLevel > 0f)
+        if (batteryLevel < 20f && batteryLevel > 0f)
         {
             batteryFlashTimer += Time.deltaTime;
-            if(batteryFlashTimer >= BATTERY_FLASH_DURATION)
+            if (batteryFlashTimer >= BATTERY_FLASH_DURATION)
             {
                 batteryRed = !batteryRed;
                 batteryFlashTimer = 0f;
-                
-                if(batteryRed)
+
+                if (batteryRed)
                 {
                     controllerElements.batteryOutlineUI.color = Color.red;
                     controllerElements.batteryFillUI.color = Color.red;
@@ -132,16 +203,16 @@ public class Player : MonoBehaviour
                 controllerElements.flashlight.intensity = (batteryLevel / 20f) * 2f;
             }
 
-            if(flashlightOn && batteryLevel <= 10f)
+            if (flashlightOn && batteryLevel <= 10f)
             {
                 batteryFlickerTimer -= Time.deltaTime;
 
                 // flicker effect.
-                if(batteryFlickerTimer <= 0f)
+                if (batteryFlickerTimer <= 0f)
                 {
                     controllerElements.flashlight.gameObject.SetActive(!controllerElements.flashlight.gameObject.activeSelf);
                     float timeFactor = batteryLevel / 10f;
-                    if(controllerElements.flashlight.gameObject.activeSelf)
+                    if (controllerElements.flashlight.gameObject.activeSelf)
                     {
                         batteryFlickerTimer = timeFactor * Random.Range(0.5f, 1.5f);
                     }
@@ -165,12 +236,12 @@ public class Player : MonoBehaviour
 
     private void checkForReload()
     {
-        if(reloading)
+        if (reloading)
         {
             // reloading animation and increment reload timer
             reloadTimer += Time.deltaTime;
 
-            if(reloadTimer >= BATTERY_RELOAD_TIME)
+            if (reloadTimer >= BATTERY_RELOAD_TIME)
             {
                 decrementBatteryCount();
                 batteryLevel += BATTERY_RELOAD_AMOUNT;
@@ -180,9 +251,9 @@ public class Player : MonoBehaviour
                 updateBatteryUI();
             }
         }
-        else if(numberOfBatteries > 0 &&  batteryLevel < MAX_BATTERY_LEVEL - BATTERY_RELOAD_AMOUNT && 
-            ((usingHydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (!usingHydra && Input.GetKeyDown(KeyCode.R))))
-                                        // TODO: figure out which button is appropriate for hydra
+        else if (numberOfBatteries > 0 && batteryLevel < MAX_BATTERY_LEVEL - BATTERY_RELOAD_AMOUNT &&
+            ((playMode == PlayMode.Hydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (playMode == PlayMode.Mouse && Input.GetKeyDown(KeyCode.R))))
+        // TODO: figure out which button is appropriate for hydra
         {
             // reload
             reloading = true;

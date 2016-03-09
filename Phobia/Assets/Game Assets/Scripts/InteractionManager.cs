@@ -10,39 +10,42 @@ public class InteractionManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
-
-        if (Physics.Raycast(ray, out hit))
+        if(player.playMode != Player.PlayMode.Remote)
         {
-            Interactable i = hit.collider.transform.gameObject.GetComponent<Interactable>();
-            if (i != null && Vector3.Distance(this.transform.position, hit.point) < i.getActivationRange())
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2f, Screen.height / 2f));
+
+            if (Physics.Raycast(ray, out hit))
             {
-                target = i;
-                player.controllerElements.handUI.SetActive(true);
+                Interactable i = hit.collider.transform.gameObject.GetComponent<Interactable>();
+                if (i != null && Vector3.Distance(player.controllerElements.controllerTransform.position, hit.point) < i.getActivationRange())
+                {
+                    target = i;
+                    player.controllerElements.handUI.SetActive(true);
+                }
+                else
+                {
+                    target = null;
+                    player.controllerElements.handUI.SetActive(false);
+                }
+            }
+
+
+            if (player.playMode == Player.PlayMode.Hydra)
+            {
+                SixenseInput.Controller rightController = SixenseInput.GetController(SixenseHands.RIGHT);
+
+                if(target != null && rightController.GetButtonDown(SixenseButtons.TRIGGER))
+                {
+                    target.activate(false);
+                }
             }
             else
             {
-                target = null;
-                player.controllerElements.handUI.SetActive(false);
-            }
-        }
-
-
-        if (player.usingHydra)
-        {
-            SixenseInput.Controller rightController = SixenseInput.GetController(SixenseHands.RIGHT);
-
-            if(target != null && rightController.GetButtonDown(SixenseButtons.TRIGGER))
-            {
-                target.activate(false);
-            }
-        }
-        else
-        {
-            if(target != null && Input.GetKeyDown(KeyCode.E))
-            {
-                target.activate(false);
+                if(target != null && Input.GetKeyDown(KeyCode.E))
+                {
+                    target.activate(false);
+                }
             }
         }
     }
