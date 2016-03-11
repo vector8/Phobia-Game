@@ -10,11 +10,7 @@ public class Battery : Interactable
     {
         base.Start();
 
-        GameObject playerGO = GameObject.Find("Player");
-        if(playerGO != null)
-        {
-            player = playerGO.GetComponent<Player>();
-        }
+        player = FindObjectOfType<Player>();
     }
 
     protected override void customNetworkMessageHandler(NetworkMessage msg)
