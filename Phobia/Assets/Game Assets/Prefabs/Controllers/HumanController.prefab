@@ -119,7 +119,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &122678
 GameObject:
   m_ObjectHideFlags: 1
@@ -233,7 +233,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &143590
 GameObject:
   m_ObjectHideFlags: 1
@@ -2080,7 +2080,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 0
+  networkID: 38
 --- !u!114 &11454878
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2218,6 +2218,8 @@ MonoBehaviour:
     fuseUI: {fileID: 0}
     fuseNumberUI: {fileID: 0}
   remoteHuman: {fileID: 170910}
+  remoteFlashlight: {fileID: 134940}
+  remoteFlashlight_light: {fileID: 117176}
   MAX_BATTERY_LEVEL: 100
   BATTERY_RELOAD_TIME: 3
   BATTERY_RELOAD_AMOUNT: 50

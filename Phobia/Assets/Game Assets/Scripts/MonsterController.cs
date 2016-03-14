@@ -71,9 +71,11 @@ public class MonsterController : MonoBehaviour
         string name;
         msg.getString("Name", out name);
         Vector3 position = new Vector3();
+        Vector3 orientation = new Vector3();
         msg.getFloat("PosX", out position.x);
         msg.getFloat("PosY", out position.y);
         msg.getFloat("PosZ", out position.z);
+        msg.getFloat("RotY", out orientation.y);
 
         switch (type)
         {
@@ -99,6 +101,7 @@ public class MonsterController : MonoBehaviour
                 if (remoteMorphSpawned != null)
                 {
                     remoteMorphSpawned.transform.position = position;
+                    remoteMorphSpawned.transform.rotation = Quaternion.Euler(orientation);
                 }
                 break;
             default:
@@ -115,6 +118,7 @@ public class MonsterController : MonoBehaviour
         networkMessageToSend.setFloat("PosX", position.x);
         networkMessageToSend.setFloat("PosY", position.y);
         networkMessageToSend.setFloat("PosZ", position.z);
+        networkMessageToSend.setFloat("RotY", orientation.y);
     }
 
     public void setLocal(bool local)
@@ -296,7 +300,7 @@ public class MonsterController : MonoBehaviour
                     networkUpdateTimer = 0f;
                     Vector3 pos = firstPersonController.transform.position;
                     pos.y -= 2.5f; // too slow to get the actual controller's height.. otherwise i need to store it and meh.
-                    buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, "", pos);
+                    buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, "", pos, firstPersonController.transform.rotation.eulerAngles);
                     netObj.sendNetworkUpdate();
                 }
 
