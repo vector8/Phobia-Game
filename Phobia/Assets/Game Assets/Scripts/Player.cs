@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
 
     public ControllerElements mouseElements, hydraElements;
     public ControllerElements controllerElements;
-    public GameObject remoteHuman;
+    public GameObject remoteHuman, remoteFlashlight, remoteFlashlight_light;
 
     public PlayMode playMode
     {
@@ -91,7 +91,7 @@ public class Player : MonoBehaviour
                 break;
         }
 
-        if(playMode != PlayMode.Remote)
+        if (playMode != PlayMode.Remote)
         {
             // Disable mouse cursor if this is a build
 #if UNITY_EDITOR
@@ -127,21 +127,27 @@ public class Player : MonoBehaviour
         msg.setFloat("PosX", controllerElements.controllerTransform.position.x);
         msg.setFloat("PosY", controllerElements.controllerTransform.position.y - 3.3f); // too slow! (controllerElements.controller.GetComponent<CharacterController>().height / 2f));
         msg.setFloat("PosZ", controllerElements.controllerTransform.position.z);
-        //msg.setFloat("RotX", m_Camera.transform.rotation.eulerAngles.x);
-        //msg.setFloat("RotY", transform.rotation.eulerAngles.y);
+        msg.setFloat("RotY", controllerElements.controllerTransform.rotation.eulerAngles.y);
+        msg.setFloat("RotX", Camera.main.transform.rotation.eulerAngles.x);
+        msg.setBool("Flshlt", controllerElements.flashlight.gameObject.activeSelf);
     }
 
     private void customNetworkMessageHandler(NetworkMessage msg)
     {
-        float xPos, yPos, zPos;//, xRot, yRot;
+        float xPos, yPos, zPos, xRot, yRot;
+        bool remoteFlashlightOn;
 
         msg.getFloat("PosX", out xPos);
         msg.getFloat("PosY", out yPos);
         msg.getFloat("PosZ", out zPos);
-        //msg.getFloat("RotX", out xRot);
-        //msg.getFloat("RotY", out yRot);
+        msg.getFloat("RotX", out xRot);
+        msg.getFloat("RotY", out yRot);
+        msg.getBool("Flshlt", out remoteFlashlightOn);
 
         remoteHuman.transform.position = new Vector3(xPos, yPos, zPos);
+        remoteHuman.transform.rotation = Quaternion.Euler(new Vector3(0f, yRot, 0f));
+        remoteFlashlight.transform.localRotation = Quaternion.Euler(new Vector3(xRot, 0f, 0f));
+        remoteFlashlight_light.SetActive(remoteFlashlightOn);
 
         //Vector3 euler = transform.rotation.eulerAngles;
         //euler.y = yRot;
@@ -162,6 +168,10 @@ public class Player : MonoBehaviour
                 // Toggle flashlight
                 flashlightOn = !flashlightOn;
                 controllerElements.flashlight.gameObject.SetActive(flashlightOn);
+
+                // update remote host with new flashlight info.
+                networkUpdateTimer = 0f;
+                netObj.sendNetworkUpdate();
             }
 
             if (flashlightOn)
@@ -249,6 +259,10 @@ public class Player : MonoBehaviour
                 reloading = false;
                 controllerElements.flashlight.gameObject.SetActive(flashlightOn);
                 updateBatteryUI();
+
+                // update remote host with new flashlight info.
+                networkUpdateTimer = 0f;
+                netObj.sendNetworkUpdate();
             }
         }
         else if (numberOfBatteries > 0 && batteryLevel < MAX_BATTERY_LEVEL - BATTERY_RELOAD_AMOUNT &&
@@ -258,6 +272,10 @@ public class Player : MonoBehaviour
             // reload
             reloading = true;
             controllerElements.flashlight.gameObject.SetActive(false);
+
+            // update remote host with new flashlight info.
+            networkUpdateTimer = 0f;
+            netObj.sendNetworkUpdate();
         }
     }
 
