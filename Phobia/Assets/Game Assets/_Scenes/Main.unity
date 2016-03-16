@@ -40240,8 +40240,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playingAs: 0
-  humanControlScheme: 0
-  serverAddress: 10.121.69.68
+  humanControlScheme: 1
+  serverAddress: 10.101.110.87
   portNumber: 8888
   playerController: {fileID: 1382671433}
   monsterController: {fileID: 1275490740}
@@ -60720,6 +60720,14 @@ Prefab:
     - target: {fileID: 141764, guid: beb6705006159f34a9254fb8d13f7cfe, type: 2}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11423418, guid: beb6705006159f34a9254fb8d13f7cfe, type: 2}
+      propertyPath: m_WalkSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 11423418, guid: beb6705006159f34a9254fb8d13f7cfe, type: 2}
+      propertyPath: m_RunSpeed
+      value: 12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: beb6705006159f34a9254fb8d13f7cfe, type: 2}
