@@ -7,6 +7,9 @@ public class InteractionManager : MonoBehaviour
 
     public Player player;
 
+    public GameObject tutorial3Text;
+    private bool interacted = false;
+
     // Update is called once per frame
     void Update()
     {
@@ -22,11 +25,14 @@ public class InteractionManager : MonoBehaviour
                 {
                     target = i;
                     player.controllerElements.handUI.SetActive(true);
+
+                    tutorial3Text.SetActive(!interacted);
                 }
                 else
                 {
                     target = null;
                     player.controllerElements.handUI.SetActive(false);
+                    tutorial3Text.SetActive(false);
                 }
             }
 
@@ -45,6 +51,7 @@ public class InteractionManager : MonoBehaviour
                 if(target != null && Input.GetKeyDown(KeyCode.E))
                 {
                     target.activate(false);
+                    interacted = true;
                 }
             }
         }

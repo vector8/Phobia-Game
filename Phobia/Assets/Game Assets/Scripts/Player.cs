@@ -58,6 +58,9 @@ public class Player : MonoBehaviour
     public bool won = false;
     public float health;
 
+    public GameObject tutorial1Text, tutorial2Text;
+    private bool reloaded = false;
+
     private float batteryFlashTimer;
     private const float BATTERY_FLASH_DURATION = 0.5f;
     private bool batteryRed = false;
@@ -111,7 +114,8 @@ public class Player : MonoBehaviour
 #if UNITY_EDITOR
             Cursor.visible = true;
 #elif UNITY_STANDALONE
-        Cursor.visible = false;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
 #endif
         }
     }
@@ -206,11 +210,22 @@ public class Player : MonoBehaviour
                 // update remote host with new flashlight info.
                 networkUpdateTimer = 0f;
                 netObj.sendNetworkUpdate();
+
+                tutorial1Text.SetActive(false);
             }
 
             if (flashlightOn)
             {
                 batteryLevel -= batteryDrainRate * Time.deltaTime;
+
+                if(batteryLevel <= 50f && !reloaded && numberOfBatteries > 0)
+                {
+                    tutorial2Text.SetActive(true);
+                }
+                else
+                {
+                    tutorial2Text.SetActive(false);
+                }
 
                 updateBatteryUI();
             }
@@ -304,6 +319,8 @@ public class Player : MonoBehaviour
         // TODO: figure out which button is appropriate for hydra
         {
             // reload
+            reloaded = true;
+            tutorial2Text.SetActive(false);
             reloading = true;
             controllerElements.flashlight.gameObject.SetActive(false);
 
