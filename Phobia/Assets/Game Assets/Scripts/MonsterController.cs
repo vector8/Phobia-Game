@@ -316,6 +316,9 @@ public class MonsterController : MonoBehaviour
 
                             buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
                             netObj.sendNetworkUpdate();
+
+                            Cursor.lockState = CursorLockMode.Locked;
+                            Cursor.visible = false;
                         }
                         else
                         {
@@ -395,6 +398,9 @@ public class MonsterController : MonoBehaviour
 
                 buildNetworkMessage(MonsterNetworkMessageType.MorphDespawned);
                 netObj.sendNetworkUpdate();
+
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             }
             else
             {
