@@ -31,6 +31,13 @@ public class FuseBox : Interactable
             fuses[i].SetActive(true);
         }
 
+        fusesActive += player.numberOfFuses;
+
+        if(fusesActive == fuses.Length)
+        {
+            player.win();
+        }
+
         player.setFuseCount(0);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using CitaNet;
 
@@ -18,6 +19,9 @@ public class Player : MonoBehaviour
         public GameObject handUI;
         public GameObject fuseUI;
         public NumberDisplayController fuseNumberUI;
+        public Image damageOverlay;
+        public GameObject winOverlay, loseOverlay;
+        public MonoBehaviour controllerScript;
     }
 
     public enum PlayMode
@@ -39,6 +43,9 @@ public class Player : MonoBehaviour
     public float MAX_BATTERY_LEVEL = 100f;
     public float BATTERY_RELOAD_TIME = 3f;
     public float BATTERY_RELOAD_AMOUNT = 50f;
+    public float HEALTH_REGEN_DELAY = 3f;
+    public float HEALTH_REGEN_PER_SECOND = 50f;
+    public float MAX_HEALTH = 100f;
 
     public float batteryLevel;
     public float batteryDrainRate = 1f;
@@ -47,6 +54,9 @@ public class Player : MonoBehaviour
     public int numberOfBatteries = 0;
     public int numberOfFuses = 0;
     public float networkUpdateDelay;
+    public bool dead = false;
+    public bool won = false;
+    public float health;
 
     private float batteryFlashTimer;
     private const float BATTERY_FLASH_DURATION = 0.5f;
@@ -54,15 +64,19 @@ public class Player : MonoBehaviour
     private float batteryFlickerTimer = 0f;
     private bool reloading = false;
     private float reloadTimer = 0f;
+    private float healthRegenDelayTimer = 0f;
 
     // networking stuff
     private NetworkedObject netObj;
     private float networkUpdateTimer = 0f;
+    private Vector3 prevPosSent = new Vector3();
+    private Vector3 prevRotSent = new Vector3();
 
     // Use this for initialization
     void Start()
     {
         batteryLevel = MAX_BATTERY_LEVEL;
+        health = MAX_HEALTH;
 
         // init network stuff
         netObj = GetComponent<NetworkedObject>();
@@ -105,8 +119,19 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (playMode != PlayMode.Remote)
+        if (playMode != PlayMode.Remote && !dead && !won)
         {
+            if(healthRegenDelayTimer > 0f)
+            {
+                healthRegenDelayTimer -= Time.deltaTime;
+            }
+
+            if(health < MAX_HEALTH && healthRegenDelayTimer <= 0f)
+            {
+                health += HEALTH_REGEN_PER_SECOND * Time.deltaTime;
+                setDamageOverlayAlpha();
+            }
+
             checkForReload();
             if (!reloading)
             {
@@ -114,22 +139,29 @@ public class Player : MonoBehaviour
             }
 
             networkUpdateTimer += Time.deltaTime;
-            if (networkUpdateTimer >= networkUpdateDelay)
+            if (networkUpdateTimer >= networkUpdateDelay &&
+                    (controllerElements.controllerTransform.position != prevPosSent || controllerElements.controllerTransform.rotation.eulerAngles.y != prevRotSent.y ||
+                    Camera.main.transform.rotation.eulerAngles.x != prevRotSent.x))
             {
                 networkUpdateTimer = 0f;
                 netObj.sendNetworkUpdate();
+                prevPosSent = controllerElements.controllerTransform.position;
+                prevRotSent.y = controllerElements.controllerTransform.rotation.eulerAngles.y;
+                prevRotSent.x = Camera.main.transform.rotation.eulerAngles.x;
             }
         }
     }
 
     private void customizeNetworkMessage(ref NetworkMessage msg)
     {
-        msg.setFloat("PosX", controllerElements.controllerTransform.position.x);
-        msg.setFloat("PosY", controllerElements.controllerTransform.position.y - 3.3f); // too slow! (controllerElements.controller.GetComponent<CharacterController>().height / 2f));
-        msg.setFloat("PosZ", controllerElements.controllerTransform.position.z);
-        msg.setFloat("RotY", controllerElements.controllerTransform.rotation.eulerAngles.y);
-        msg.setFloat("RotX", Camera.main.transform.rotation.eulerAngles.x);
-        msg.setBool("Flshlt", controllerElements.flashlight.gameObject.activeSelf);
+        msg.setFloat("PX", controllerElements.controllerTransform.position.x);
+        msg.setFloat("PY", controllerElements.controllerTransform.position.y - 3.3f); // too slow! (controllerElements.controller.GetComponent<CharacterController>().height / 2f));
+        msg.setFloat("PZ", controllerElements.controllerTransform.position.z);
+        msg.setFloat("RY", controllerElements.controllerTransform.rotation.eulerAngles.y);
+        msg.setFloat("RX", Camera.main.transform.rotation.eulerAngles.x);
+        msg.setBool("F", controllerElements.flashlight.gameObject.activeSelf);
+        msg.setBool("D", dead);
+        msg.setBool("W", won);
     }
 
     private void customNetworkMessageHandler(NetworkMessage msg)
@@ -137,12 +169,14 @@ public class Player : MonoBehaviour
         float xPos, yPos, zPos, xRot, yRot;
         bool remoteFlashlightOn;
 
-        msg.getFloat("PosX", out xPos);
-        msg.getFloat("PosY", out yPos);
-        msg.getFloat("PosZ", out zPos);
-        msg.getFloat("RotX", out xRot);
-        msg.getFloat("RotY", out yRot);
-        msg.getBool("Flshlt", out remoteFlashlightOn);
+        msg.getFloat("PX", out xPos);
+        msg.getFloat("PY", out yPos);
+        msg.getFloat("PZ", out zPos);
+        msg.getFloat("RX", out xRot);
+        msg.getFloat("RY", out yRot);
+        msg.getBool("F", out remoteFlashlightOn);
+        msg.getBool("D", out dead);
+        msg.getBool("W", out won);
 
         remoteHuman.transform.position = new Vector3(xPos, yPos, zPos);
         remoteHuman.transform.rotation = Quaternion.Euler(new Vector3(0f, yRot, 0f));
@@ -318,5 +352,36 @@ public class Player : MonoBehaviour
         numberOfFuses = count;
         controllerElements.fuseNumberUI.setNumber(numberOfFuses);
         controllerElements.fuseUI.SetActive(numberOfFuses > 0);
+    }
+
+    public void takeDamage(float damage)
+    {
+        health -= damage;
+        healthRegenDelayTimer = HEALTH_REGEN_DELAY;
+        setDamageOverlayAlpha();
+        if (health <= 0f)
+        {
+            dead = true;
+            controllerElements.loseOverlay.SetActive(true);
+            controllerElements.controllerScript.enabled = false;
+            networkUpdateTimer = 0f;
+            netObj.sendNetworkUpdate();
+        }
+    }
+
+    public void win()
+    {
+        won = true;
+        controllerElements.winOverlay.SetActive(true);
+        controllerElements.controllerScript.enabled = false;
+        networkUpdateTimer = 0f;
+        netObj.sendNetworkUpdate();
+    }
+
+    private void setDamageOverlayAlpha()
+    {
+        Color c = controllerElements.damageOverlay.color;
+        c.a = 1f - (health / MAX_HEALTH);
+        controllerElements.damageOverlay.color = c;
     }
 }

@@ -41,7 +41,7 @@ namespace CitaNet
                     NetworkMessage msg = new NetworkMessage(rawMessage);
 
                     int instanceID;
-                    if (msg.getInt(NetworkedObject.INSTANCE_ID_KEY, out instanceID))
+                    if (msg.getInt(NetworkedObject.ID_KEY, out instanceID))
                     {
                         GameObjNetObjPair objs;
                         if (networkedObjects.TryGetValue(instanceID, out objs))
