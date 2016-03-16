@@ -5,7 +5,7 @@ namespace CitaNet
 {
     public class NetworkedObject : MonoBehaviour
     {
-        public const string INSTANCE_ID_KEY = "InstID";
+        public const string ID_KEY = "ID";
 
         public int networkID;
 
@@ -26,7 +26,7 @@ namespace CitaNet
         private NetworkMessage getNetworkMessage()
         {
             NetworkMessage msg = new NetworkMessage();
-            msg.setInt(INSTANCE_ID_KEY, networkID);
+            msg.setInt(ID_KEY, networkID);
             if(customNetworkMessageFunc != null)
             {
                 customNetworkMessageFunc(ref msg);

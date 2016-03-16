@@ -25,8 +25,16 @@ public class MonsterController : MonoBehaviour
         TrapSpawned,
         MorphSpawned,
         MorphDespawned,
-        MorphMoved
+        MorphMoved,
+        PlayerHit
     }
+
+    public float MORPH_COOLDOWN;
+    public float MAX_TIME_IN_LIGHT;
+    public float MAX_MORPH_TIME;
+    public float MELEE_RANGE;
+    public float MELEE_DAMAGE;
+    public Vector4 TOP_DOWN_CAMERA_EXTENTS;
 
     public Camera topDownCam, transitionCam;
     public GameObject topDownParent, fpsParent, monsterLight;
@@ -36,9 +44,19 @@ public class MonsterController : MonoBehaviour
     public bool isFirstPerson = false;
     public bool isLocal;
     public float networkUpdateDelay;
+    public bool allowMouseMove;
+    public float morphCooldownTimer = 0f;
+    public float inLightTimer = 0f;
+    public float morphDurationTimer = 0f;
+
+    public Player player;
+    public Light playerLight;
+    public Collider entryLightCollider;
 
     public StringPrefabDictEntry[] monsterSpawnPrefabs;
     public Dictionary<string, GameObject> monsterSpawnPrefabsDict;
+
+    public GameObject winOverlayFPS, winOverlayTopdown, loseOverlayFPS, loseOverlayTopdown;
 
     private const float MIN_ORTHO_SIZE = 3f, MAX_ORTHO_SIZE = 50f, ORTHO_SIZE_DIFF = 47f;
     private const float MIN_ORTHO_SPEED_MULTIPLIER = 3.3333f, MAX_ORTHO_SPEED_MULTIPLIER = 1.2f;
@@ -50,11 +68,17 @@ public class MonsterController : MonoBehaviour
     private Transform origin, target;
     private Interactable targetInteractable = null;
 
+    private bool dead = false;
+
+    private bool gameOver = false;
+
     // networking
     private NetworkedObject netObj;
     private float networkUpdateTimer = 0f;
     private NetworkMessage networkMessageToSend;
     private GameObject remoteMorphSpawned = null;
+    private Vector3 prevPosSent = new Vector3();
+    private Vector3 prevRotSent = new Vector3();
 
     private void customizeNetworkMessage(ref NetworkMessage msg)
     {
@@ -64,18 +88,18 @@ public class MonsterController : MonoBehaviour
     private void customNetworkMessageHandler(NetworkMessage msg)
     {
         int msgType;
-        msg.getInt("Type", out msgType);
+        msg.getInt("T", out msgType);
 
         MonsterNetworkMessageType type = (MonsterNetworkMessageType)msgType;
 
         string name;
-        msg.getString("Name", out name);
+        msg.getString("N", out name);
         Vector3 position = new Vector3();
         Vector3 orientation = new Vector3();
-        msg.getFloat("PosX", out position.x);
-        msg.getFloat("PosY", out position.y);
-        msg.getFloat("PosZ", out position.z);
-        msg.getFloat("RotY", out orientation.y);
+        msg.getFloat("PX", out position.x);
+        msg.getFloat("PY", out position.y);
+        msg.getFloat("PZ", out position.z);
+        msg.getFloat("RY", out orientation.y);
 
         switch (type)
         {
@@ -104,6 +128,9 @@ public class MonsterController : MonoBehaviour
                     remoteMorphSpawned.transform.rotation = Quaternion.Euler(orientation);
                 }
                 break;
+            case MonsterNetworkMessageType.PlayerHit:
+                player.takeDamage(MELEE_DAMAGE);
+                break;
             default:
                 break;
         }
@@ -112,13 +139,13 @@ public class MonsterController : MonoBehaviour
     private void buildNetworkMessage(MonsterNetworkMessageType type, string nameOfSpawn = "", Vector3 position = new Vector3(), Vector3 orientation = new Vector3())
     {
         networkMessageToSend = new NetworkMessage();
-        networkMessageToSend.setInt(NetworkedObject.INSTANCE_ID_KEY, netObj.networkID);
-        networkMessageToSend.setInt("Type", (int)type);
-        networkMessageToSend.setString("Name", nameOfSpawn);
-        networkMessageToSend.setFloat("PosX", position.x);
-        networkMessageToSend.setFloat("PosY", position.y);
-        networkMessageToSend.setFloat("PosZ", position.z);
-        networkMessageToSend.setFloat("RotY", orientation.y);
+        networkMessageToSend.setInt(NetworkedObject.ID_KEY, netObj.networkID);
+        networkMessageToSend.setInt("T", (int)type);
+        networkMessageToSend.setString("N", nameOfSpawn);
+        networkMessageToSend.setFloat("PX", position.x);
+        networkMessageToSend.setFloat("PY", position.y);
+        networkMessageToSend.setFloat("PZ", position.z);
+        networkMessageToSend.setFloat("RY", orientation.y);
     }
 
     public void setLocal(bool local)
@@ -136,6 +163,8 @@ public class MonsterController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        morphCooldownTimer = MORPH_COOLDOWN;
+
         monsterSpawnPrefabsDict = new Dictionary<string, GameObject>();
         foreach (StringPrefabDictEntry e in monsterSpawnPrefabs)
         {
@@ -153,12 +182,35 @@ public class MonsterController : MonoBehaviour
     {
         if (isLocal)
         {
-            updateLocal();
+            if(!gameOver)
+            {
+                if (player.won)
+                {
+                    loseOverlayFPS.SetActive(true);
+                    loseOverlayTopdown.SetActive(true);
+                    gameOver = true;
+                    return;
+                }
+                else if (player.dead)
+                {
+                    winOverlayFPS.SetActive(true);
+                    winOverlayTopdown.SetActive(true);
+                    gameOver = true;
+                    return;
+                }
+
+                updateLocal();
+            }
         }
     }
 
     private void updateLocal()
     {
+        if(morphCooldownTimer < MORPH_COOLDOWN)
+        {
+            morphCooldownTimer += Time.deltaTime;
+        }
+
         if (transitioning)
         {
             transitionTimer += Time.deltaTime;
@@ -182,7 +234,7 @@ public class MonsterController : MonoBehaviour
 
             Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
 
-            if (Mathf.Approximately(direction.sqrMagnitude, 0))
+            if (allowMouseMove && Mathf.Approximately(direction.sqrMagnitude, 0))
             {
                 // try to get scroll info based on mouse position
                 Vector3 mPos = Input.mousePosition;
@@ -205,16 +257,16 @@ public class MonsterController : MonoBehaviour
                     direction.z = 1f;
                 }
             }
-            else
-            {
-                direction.Normalize();
 
-                Vector3 pos = topDownCam.transform.position;
-                float u = (topDownCam.orthographicSize - MIN_ORTHO_SIZE) / ORTHO_SIZE_DIFF;
-                float tempSpeed = Mathf.Lerp(MIN_ORTHO_SPEED_MULTIPLIER, MAX_ORTHO_SPEED_MULTIPLIER, u) * topDownCam.orthographicSize;
-                pos -= direction * scrollSpeedMultiplier * Time.deltaTime * tempSpeed;
-                topDownCam.transform.position = pos;
-            }
+            direction.Normalize();
+
+            Vector3 pos = topDownCam.transform.position;
+            float u = (topDownCam.orthographicSize - MIN_ORTHO_SIZE) / ORTHO_SIZE_DIFF;
+            float tempSpeed = Mathf.Lerp(MIN_ORTHO_SPEED_MULTIPLIER, MAX_ORTHO_SPEED_MULTIPLIER, u) * topDownCam.orthographicSize;
+            pos -= direction * scrollSpeedMultiplier * Time.deltaTime * tempSpeed;
+            pos.x = Mathf.Clamp(pos.x, TOP_DOWN_CAMERA_EXTENTS.x, TOP_DOWN_CAMERA_EXTENTS.y);
+            pos.z = Mathf.Clamp(pos.z, TOP_DOWN_CAMERA_EXTENTS.z, TOP_DOWN_CAMERA_EXTENTS.w);
+            topDownCam.transform.position = pos;
 
             if (Input.GetMouseButtonDown(1))
             {
@@ -247,20 +299,28 @@ public class MonsterController : MonoBehaviour
                         }
                         break;
                     case MonsterAbilities.Morph:
-                        transitionCam.transform.position = topDownCam.transform.position;
-                        transitionCam.transform.rotation = topDownCam.transform.rotation;
-                        transitioning = true;
-                        firstPersonController.transform.position = placementPosition + new Vector3(0f, 2.5f, 0f);
-                        firstPersonController.transform.rotation = Quaternion.identity;
-                        transitionTimer = 0f;
-                        origin = topDownCam.transform;
-                        target = firstPersonController.transform;
+                        if(morphCooldownTimer >= MORPH_COOLDOWN)
+                        {
+                            morphCooldownTimer = 0f;
+                            transitionCam.transform.position = topDownCam.transform.position;
+                            transitionCam.transform.rotation = topDownCam.transform.rotation;
+                            transitioning = true;
+                            firstPersonController.transform.position = placementPosition + new Vector3(0f, 2.5f, 0f);
+                            firstPersonController.transform.rotation = Quaternion.identity;
+                            transitionTimer = 0f;
+                            origin = topDownCam.transform;
+                            target = firstPersonController.transform;
 
-                        transitionCam.gameObject.SetActive(true);
-                        topDownParent.SetActive(false);
+                            transitionCam.gameObject.SetActive(true);
+                            topDownParent.SetActive(false);
 
-                        buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
-                        netObj.sendNetworkUpdate();
+                            buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
+                            netObj.sendNetworkUpdate();
+                        }
+                        else
+                        {
+                            // TODO: give the player some kind of feedback that they cant do this
+                        }
                         break;
                     default:
                         break;
@@ -271,8 +331,52 @@ public class MonsterController : MonoBehaviour
         }
         else // isFirstPerson
         {
-            if (Input.GetKeyDown(KeyCode.Q)) // OR dead OR timesUp)
+            morphDurationTimer += Time.deltaTime;
+
+            if(firstPersonController.GetComponent<Collider>().bounds.Intersects(entryLightCollider.bounds))
             {
+                inLightTimer += Time.deltaTime;
+
+                if (inLightTimer > MAX_TIME_IN_LIGHT)
+                {
+                    dead = true;
+                    inLightTimer = 0f;
+                }
+            }
+            // check if we are in the player's flashlight cone
+            else if(morphDurationTimer < MAX_MORPH_TIME && (playerLight.gameObject.activeSelf))
+            {
+                Vector3 diff = firstPersonController.transform.position - playerLight.transform.position;
+                Vector3 lightAxis = playerLight.transform.forward * playerLight.range;
+                float dot = Vector3.Dot(diff, lightAxis);
+
+                if (dot / (diff.magnitude * playerLight.range) > Mathf.Cos(Mathf.Deg2Rad * playerLight.spotAngle / 2f) &&   // we are in the infinite cone
+                    dot / playerLight.range < playerLight.range)    // we are in range
+                {
+                    // check if we are in line of sight
+                    RaycastHit hit;
+                    Ray ray = new Ray(playerLight.transform.position, firstPersonController.transform.position - playerLight.transform.position);
+
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        if(hit.collider.gameObject.GetInstanceID() == firstPersonController.GetInstanceID())
+                        {
+                            inLightTimer += Time.deltaTime;
+
+                            if(inLightTimer > MAX_TIME_IN_LIGHT)
+                            {
+                                dead = true;
+                                inLightTimer = 0f;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Q) || dead || morphDurationTimer > MAX_MORPH_TIME)
+            {
+                morphDurationTimer = 0f;
+                dead = false;
                 transitioning = true;
                 transitionTimer = 0f;
                 Vector3 newTopDownPos = firstPersonController.transform.position;
@@ -295,13 +399,16 @@ public class MonsterController : MonoBehaviour
             else
             {
                 networkUpdateTimer += Time.deltaTime;
-                if (networkUpdateTimer >= networkUpdateDelay)
+                if (networkUpdateTimer >= networkUpdateDelay && 
+                    (firstPersonController.transform.position != prevPosSent || firstPersonController.transform.rotation.eulerAngles != prevRotSent))
                 {
                     networkUpdateTimer = 0f;
                     Vector3 pos = firstPersonController.transform.position;
                     pos.y -= 2.5f; // too slow to get the actual controller's height.. otherwise i need to store it and meh.
                     buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, "", pos, firstPersonController.transform.rotation.eulerAngles);
                     netObj.sendNetworkUpdate();
+                    prevPosSent = firstPersonController.transform.position;
+                    prevRotSent = firstPersonController.transform.rotation.eulerAngles;
                 }
 
                 // check for interaction
@@ -310,22 +417,35 @@ public class MonsterController : MonoBehaviour
 
                 if (Physics.Raycast(ray, out hit))
                 {
-                    Interactable i = hit.collider.transform.gameObject.GetComponent<Interactable>();
-                    if (i != null && Vector3.Distance(firstPersonController.transform.position, hit.point) < i.getActivationRange())
+                    Interactable i = hit.collider.gameObject.GetComponent<Interactable>();
+                    if (i != null && hit.distance < i.getActivationRange())
                     {
-                        targetInteractable = i;
                         interactionIcon.SetActive(true);
+                        if (Input.GetKeyDown(KeyCode.E))
+                        {
+                            i.activate(false);
+                        }
                     }
                     else
                     {
-                        targetInteractable = null;
                         interactionIcon.SetActive(false);
                     }
-                }
 
-                if (targetInteractable != null && Input.GetKeyDown(KeyCode.E))
+                    Player p = hit.collider.transform.parent.GetComponent<Player>();
+                    if(p != null && hit.distance <= MELEE_RANGE)
+                    {
+                        // TODO: set attack icon active
+                        if(Input.GetMouseButtonDown(0))
+                        {
+                            buildNetworkMessage(MonsterNetworkMessageType.PlayerHit);
+                            netObj.sendNetworkUpdate();
+                        }
+                    }
+                }
+                else
                 {
-                    targetInteractable.activate(false);
+                    // set all interaction icons inactive
+                    interactionIcon.SetActive(false);
                 }
             }
         }
