@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
         public Image damageOverlay;
         public GameObject winOverlay, loseOverlay;
         public MonoBehaviour controllerScript;
+        public AudioSource flashlightAudioSource;
     }
 
     public enum PlayMode
@@ -31,15 +32,22 @@ public class Player : MonoBehaviour
         Remote
     }
 
-    public ControllerElements mouseElements, hydraElements;
+    [Header("Controller Elements")]
+    public ControllerElements mouseElements;
+    public ControllerElements hydraElements;
     public ControllerElements controllerElements;
-    public GameObject remoteHuman, remoteFlashlight, remoteFlashlight_light;
+
+    [Header("Remote Objects")]
+    public GameObject remoteHuman;
+    public GameObject remoteFlashlight;
+    public GameObject remoteFlashlight_light;
 
     public PlayMode playMode
     {
         get; private set;
     }
 
+    [Header("Constants")]
     public float MAX_BATTERY_LEVEL = 100f;
     public float BATTERY_RELOAD_TIME = 3f;
     public float BATTERY_RELOAD_AMOUNT = 50f;
@@ -47,6 +55,12 @@ public class Player : MonoBehaviour
     public float HEALTH_REGEN_PER_SECOND = 50f;
     public float MAX_HEALTH = 100f;
 
+    [Header("Sounds")]
+    public AudioClip flashLightClick;
+    public AudioClip flashLightFlicker;
+    public float volumeScale;
+
+    [Header("Misc")]
     public float batteryLevel;
     public float batteryDrainRate = 1f;
     public bool flashlightOn = true;
@@ -58,7 +72,9 @@ public class Player : MonoBehaviour
     public bool won = false;
     public float health;
 
-    public GameObject tutorial1Text, tutorial2Text;
+    [Header("Tutorial Text")]
+    public GameObject tutorial1Text;
+    public GameObject tutorial2Text;
     private bool reloaded = false;
 
     private float batteryFlashTimer;
@@ -212,6 +228,8 @@ public class Player : MonoBehaviour
                 netObj.sendNetworkUpdate();
 
                 tutorial1Text.SetActive(false);
+
+                controllerElements.flashlightAudioSource.PlayOneShot(flashLightClick, volumeScale);
             }
 
             if (flashlightOn)

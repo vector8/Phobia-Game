@@ -238,8 +238,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 114320}
-  m_LocalRotation: {x: 0, y: 0.70724493, z: 0, w: 0.7069686}
-  m_LocalPosition: {x: -222.7, y: 1.8847022, z: 136.53}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 25.138153, y: -0.00000089779496, z: 14.986256}
   m_LocalScale: {x: 0.7715122, y: 0.4687997, z: 0.7715121}
   m_Children:
   - {fileID: 415738}
@@ -252,7 +252,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 183804}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5302973, z: -1.47}
+  m_LocalPosition: {x: 0, y: 1.5302973, z: -1.407368}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 415096}
@@ -845,6 +845,7 @@ MonoBehaviour:
   m_AudioOpen: {fileID: 8300000, guid: 1b0bada57a7071f45934fb1ff71e4da6, type: 3}
   m_AudioClose: {fileID: 8300000, guid: b635e6bf5438bf340a6a31cc34e0c9b9, type: 3}
   m_TotalTime: 0.8
+  openPosition: 1.67
 --- !u!114 &11410374
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -856,7 +857,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 0
+  networkID: 55
 --- !u!114 &11414630
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -868,7 +869,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 0
+  networkID: 4
 --- !u!114 &11462490
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -883,6 +884,7 @@ MonoBehaviour:
   m_AudioOpen: {fileID: 8300000, guid: 1b0bada57a7071f45934fb1ff71e4da6, type: 3}
   m_AudioClose: {fileID: 8300000, guid: b635e6bf5438bf340a6a31cc34e0c9b9, type: 3}
   m_TotalTime: 0.8
+  openPosition: 1.67
 --- !u!114 &11476086
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -897,6 +899,7 @@ MonoBehaviour:
   m_AudioOpen: {fileID: 8300000, guid: 1b0bada57a7071f45934fb1ff71e4da6, type: 3}
   m_AudioClose: {fileID: 8300000, guid: b635e6bf5438bf340a6a31cc34e0c9b9, type: 3}
   m_TotalTime: 0.8
+  openPosition: 1.67
 --- !u!114 &11478470
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -908,7 +911,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 0
+  networkID: 27
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
