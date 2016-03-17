@@ -8,6 +8,7 @@ public class Drawer : Interactable
     public AudioClip m_AudioOpen;
     public AudioClip m_AudioClose;
     public float m_TotalTime;
+    public float openPosition;
 
     private bool m_open = false;
     private AudioSource cached_AS;
@@ -25,7 +26,7 @@ public class Drawer : Interactable
         cached_AS = GetComponent<AudioSource>();
         m_ClosedPosition = transform.localPosition;
         m_OpenPosition = transform.localPosition;
-        m_OpenPosition.z = 1.67f;
+        m_OpenPosition.z = openPosition;
     }
 
     // Update is called once per frame
