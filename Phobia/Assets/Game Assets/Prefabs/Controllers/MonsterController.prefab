@@ -285,7 +285,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &163566
 GameObject:
   m_ObjectHideFlags: 1
@@ -459,7 +459,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &193632
 GameObject:
   m_ObjectHideFlags: 1
@@ -1162,7 +1162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 62
+  networkID: 45
 --- !u!114 &11448752
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1322,7 +1322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 56
+  networkID: 46
 --- !u!114 &11475972
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1550,7 +1550,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9361736fa02676341896d43c4cad4838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MORPH_COOLDOWN: 60
+  MORPH_COOLDOWN: 30
   MAX_TIME_IN_LIGHT: 1
   MAX_MORPH_TIME: 20
   MELEE_RANGE: 5

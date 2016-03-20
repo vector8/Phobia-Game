@@ -72,9 +72,10 @@ public class Player : MonoBehaviour
     public bool won = false;
     public float health;
 
-    [Header("Tutorial Text")]
+    [Header("Tutorial")]
     public GameObject tutorial1Text;
     public GameObject tutorial2Text;
+    public GameObject tutorialArea;
     private bool reloaded = false;
 
     private float batteryFlashTimer;
@@ -94,7 +95,6 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        batteryLevel = MAX_BATTERY_LEVEL;
         health = MAX_HEALTH;
 
         // init network stuff
@@ -133,6 +133,11 @@ public class Player : MonoBehaviour
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
 #endif
+            tutorialArea.SetActive(true);
+        }
+        else
+        {
+            tutorialArea.SetActive(false);
         }
     }
 

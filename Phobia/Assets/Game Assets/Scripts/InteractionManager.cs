@@ -21,7 +21,7 @@ public class InteractionManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 Interactable i = hit.collider.gameObject.GetComponent<Interactable>();
-                if (i != null && hit.distance < i.getActivationRange())
+                if (i != null && i.activatable && hit.distance < i.getActivationRange())
                 {
                     target = i;
                     player.controllerElements.handUI.SetActive(true);

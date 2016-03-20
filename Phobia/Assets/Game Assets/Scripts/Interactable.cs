@@ -1,18 +1,23 @@
 ﻿using UnityEngine;
 using CitaNet;
 
-[RequireComponent (typeof(NetworkedObject))]
 public abstract class Interactable : MonoBehaviour
 {
     public const float STANDARD_ACTIVATION_RANGE = 10f;
+    public bool activatable = true;
+    public bool activatableByMonster = true;
+    public bool usesNetwork = true;
 
     protected NetworkedObject netObj;
 
     protected virtual void Start()
     {
-        netObj = GetComponent<NetworkedObject>();
-        netObj.customNetworkMessageFunc = customizeNetworkMessage;
-        netObj.customNetworkMessageHandler = customNetworkMessageHandler;
+        if(usesNetwork)
+        {
+            netObj = GetComponent<NetworkedObject>();
+            netObj.customNetworkMessageFunc = customizeNetworkMessage;
+            netObj.customNetworkMessageHandler = customNetworkMessageHandler;
+        }
     }
 
     protected virtual void customizeNetworkMessage(ref NetworkMessage msg)
@@ -31,7 +36,7 @@ public abstract class Interactable : MonoBehaviour
 
     public virtual void activate(bool fromNetwork)
     {
-        if(!fromNetwork)
+        if(!fromNetwork && usesNetwork)
         {
             netObj.sendNetworkUpdate();
         }

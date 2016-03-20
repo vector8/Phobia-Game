@@ -27,10 +27,9 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 163892}
-  m_LocalRotation: {x: 0.00000050978315, y: 0.0000000066724226, z: 0.00017383695,
-    w: 1}
-  m_LocalPosition: {x: -51.18, y: 0.54, z: 6.73}
-  m_LocalScale: {x: 0.33681133, y: 0.33681133, z: 0.3368114}
+  m_LocalRotation: {x: -0.00017351673, y: 0.07384534, z: -0.000010559064, w: 0.9972697}
+  m_LocalPosition: {x: 5.15, y: 0.53, z: 23.54}
+  m_LocalScale: {x: 0.33681133, y: 0.3368113, z: 0.3368114}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -93,7 +92,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 0
+  networkID: 62
 --- !u!114 &11490516
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -105,6 +104,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc70e95429ad9e14aacd394d1d93443e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activatable: 1
+  activatableByMonster: 0
+  usesNetwork: 1
 --- !u!136 &13640208
 CapsuleCollider:
   m_ObjectHideFlags: 1
