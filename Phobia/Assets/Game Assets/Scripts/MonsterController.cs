@@ -66,7 +66,6 @@ public class MonsterController : MonoBehaviour
     private float transitionTimer = 0f;
 
     private Transform origin, target;
-    private Interactable targetInteractable = null;
 
     private bool dead = false;
 
@@ -152,11 +151,13 @@ public class MonsterController : MonoBehaviour
     {
         isLocal = local;
 
+        topDownParent.SetActive(isLocal);
+        monsterLight.SetActive(isLocal);
+        entryLightCollider.gameObject.SetActive(isLocal);
+
         if (!isLocal)
         {
-            topDownParent.SetActive(false);
             fpsParent.SetActive(false);
-            monsterLight.SetActive(false);
         }
     }
 
@@ -275,58 +276,82 @@ public class MonsterController : MonoBehaviour
 
             if (currentAbility != MonsterAbilities.None && Input.GetMouseButtonDown(0))
             {
-                Vector3 placementPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                placementPosition.y = 1f;
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                bool failed = false;
 
-                switch (currentAbility)
+                if (Physics.Raycast(ray, out hit))
                 {
-                    case MonsterAbilities.Sound:
+                    if (hit.collider.gameObject.tag == "Floor")
+                    {
+                        Vector3 placementPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                        placementPosition.y = 1f;
+
+                        switch (currentAbility)
                         {
-                            GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["PopGoesTheWeasel"]);
-                            go.transform.position = placementPosition;
+                            case MonsterAbilities.Sound:
+                                {
+                                    GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["PopGoesTheWeasel"]);
+                                    go.transform.position = placementPosition;
 
-                            buildNetworkMessage(MonsterNetworkMessageType.SoundSpawned, "PopGoesTheWeasel", placementPosition);
-                            netObj.sendNetworkUpdate();
+                                    buildNetworkMessage(MonsterNetworkMessageType.SoundSpawned, "PopGoesTheWeasel", placementPosition);
+                                    netObj.sendNetworkUpdate();
+                                }
+                                break;
+                            case MonsterAbilities.Trap:
+                                {
+                                    GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["JackInTheBox"]);
+                                    go.transform.position = placementPosition;
+
+                                    buildNetworkMessage(MonsterNetworkMessageType.TrapSpawned, "JackInTheBox", placementPosition);
+                                    netObj.sendNetworkUpdate();
+                                }
+                                break;
+                            case MonsterAbilities.Morph:
+                                if (morphCooldownTimer >= MORPH_COOLDOWN)
+                                {
+                                    morphCooldownTimer = 0f;
+                                    transitionCam.transform.position = topDownCam.transform.position;
+                                    transitionCam.transform.rotation = topDownCam.transform.rotation;
+                                    transitioning = true;
+                                    firstPersonController.transform.position = placementPosition + new Vector3(0f, 2.5f, 0f);
+                                    firstPersonController.transform.rotation = Quaternion.identity;
+                                    transitionTimer = 0f;
+                                    origin = topDownCam.transform;
+                                    target = firstPersonController.transform;
+
+                                    transitionCam.gameObject.SetActive(true);
+                                    topDownParent.SetActive(false);
+
+                                    buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
+                                    netObj.sendNetworkUpdate();
+
+                                    Cursor.lockState = CursorLockMode.Locked;
+                                    Cursor.visible = false;
+                                }
+                                else
+                                {
+                                    failed = true;
+                                }
+                                break;
+                            default:
+                                break;
                         }
-                        break;
-                    case MonsterAbilities.Trap:
-                        {
-                            GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["JackInTheBox"]);
-                            go.transform.position = placementPosition;
+                    }
+                    else
+                    {
+                        failed = true;
+                    }
+                }
+                else
+                {
+                    failed = true;
+                }
 
-                            buildNetworkMessage(MonsterNetworkMessageType.TrapSpawned, "JackInTheBox", placementPosition);
-                            netObj.sendNetworkUpdate();
-                        }
-                        break;
-                    case MonsterAbilities.Morph:
-                        if(morphCooldownTimer >= MORPH_COOLDOWN)
-                        {
-                            morphCooldownTimer = 0f;
-                            transitionCam.transform.position = topDownCam.transform.position;
-                            transitionCam.transform.rotation = topDownCam.transform.rotation;
-                            transitioning = true;
-                            firstPersonController.transform.position = placementPosition + new Vector3(0f, 2.5f, 0f);
-                            firstPersonController.transform.rotation = Quaternion.identity;
-                            transitionTimer = 0f;
-                            origin = topDownCam.transform;
-                            target = firstPersonController.transform;
+                if(failed)
+                {
+                    // TODO: give the player some kind of feedback that they cant do this
 
-                            transitionCam.gameObject.SetActive(true);
-                            topDownParent.SetActive(false);
-
-                            buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
-                            netObj.sendNetworkUpdate();
-
-                            Cursor.lockState = CursorLockMode.Locked;
-                            Cursor.visible = false;
-                        }
-                        else
-                        {
-                            // TODO: give the player some kind of feedback that they cant do this
-                        }
-                        break;
-                    default:
-                        break;
                 }
 
                 currentAbility = MonsterAbilities.None;
@@ -424,7 +449,7 @@ public class MonsterController : MonoBehaviour
                 if (Physics.Raycast(ray, out hit))
                 {
                     Interactable i = hit.collider.gameObject.GetComponent<Interactable>();
-                    if (i != null && hit.distance < i.getActivationRange())
+                    if (i != null && i.activatable && i.activatableByMonster && hit.distance < i.getActivationRange())
                     {
                         interactionIcon.SetActive(true);
                         if (Input.GetKeyDown(KeyCode.E))
