@@ -50,7 +50,7 @@ GameObject:
   - 82: {fileID: 8296150}
   m_Layer: 0
   m_Name: MouseController
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -353,7 +353,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &143590
 GameObject:
   m_ObjectHideFlags: 1
@@ -595,6 +595,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &162318
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 224: {fileID: 22474166}
+  m_Layer: 5
+  m_Name: Tutorials
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &168418
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,7 +781,7 @@ GameObject:
   - 114: {fileID: 11401460}
   m_Layer: 0
   m_Name: HydraController
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1141,7 +1156,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 108892}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.66, y: 4.02, z: -5.11}
+  m_LocalPosition: {x: 19.81, y: 4.02, z: -143.23}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 401740}
@@ -1179,7 +1194,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 184164}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.66, y: 4.02, z: -5.11}
+  m_LocalPosition: {x: 20.6, y: 4.02, z: -145.25}
   m_LocalScale: {x: 1, y: 3, z: 1}
   m_Children:
   - {fileID: 481848}
@@ -1894,7 +1909,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -2714,7 +2729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 82
+  networkID: 23
 --- !u!114 &11454878
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2928,7 +2943,7 @@ MonoBehaviour:
   flashLightClick: {fileID: 8300000, guid: bf0087b4098e68647be0c6922f749f0c, type: 3}
   flashLightFlicker: {fileID: 8300000, guid: 6056cbaa811f4224ca3e31009e3cc903, type: 3}
   volumeScale: 0.4
-  batteryLevel: 0
+  batteryLevel: 60
   batteryDrainRate: 1
   flashlightOn: 0
   useFlashlightBatteryDimming: 0
@@ -2940,6 +2955,7 @@ MonoBehaviour:
   health: 0
   tutorial1Text: {fileID: 116568}
   tutorial2Text: {fileID: 138174}
+  tutorialArea: {fileID: 0}
 --- !u!114 &11473114
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3640,14 +3656,14 @@ RectTransform:
   m_GameObject: {fileID: 138174}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children: []
-  m_Father: {fileID: 22453118}
-  m_RootOrder: 6
+  m_Father: {fileID: 22474166}
+  m_RootOrder: 1
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -146.7, y: 0}
-  m_SizeDelta: {x: -293.4, y: 0}
+  m_SizeDelta: {x: -393.4, y: -100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &22445922
 RectTransform:
@@ -3679,14 +3695,14 @@ RectTransform:
   m_GameObject: {fileID: 151312}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children: []
-  m_Father: {fileID: 22453118}
-  m_RootOrder: 7
+  m_Father: {fileID: 22474166}
+  m_RootOrder: 2
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 83.05, y: 0}
-  m_SizeDelta: {x: 166.1, y: 0}
+  m_SizeDelta: {x: 66.100006, y: -100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &22453118
 RectTransform:
@@ -3703,9 +3719,7 @@ RectTransform:
   - {fileID: 22405882}
   - {fileID: 22478874}
   - {fileID: 22490696}
-  - {fileID: 22463260}
-  - {fileID: 22445900}
-  - {fileID: 22447092}
+  - {fileID: 22474166}
   m_Father: {fileID: 482212}
   m_RootOrder: 1
   m_AnchorMin: {x: 0, y: 0}
@@ -3721,14 +3735,14 @@ RectTransform:
   m_GameObject: {fileID: 116568}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children: []
-  m_Father: {fileID: 22453118}
-  m_RootOrder: 5
+  m_Father: {fileID: 22474166}
+  m_RootOrder: 0
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -170.73, y: 0}
-  m_SizeDelta: {x: -341.46, y: 0}
+  m_SizeDelta: {x: -441.46, y: -100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &22467746
 RectTransform:
@@ -3763,6 +3777,26 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 781.411, y: 488.637}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!224 &22474166
+RectTransform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 162318}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_Children:
+  - {fileID: 22463260}
+  - {fileID: 22445900}
+  - {fileID: 22447092}
+  m_Father: {fileID: 22453118}
+  m_RootOrder: 5
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &22476934
 RectTransform:
