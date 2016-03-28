@@ -20,7 +20,8 @@ namespace CitaNet
         void Start()
         {
             citaNetMgr = CitaNetManager.getInstance();
-            citaNetMgr.registerNetworkedObject(gameObject, this);
+            NetworkedObject netObj = this;
+            citaNetMgr.registerNetworkedObject(gameObject, ref netObj);
         }
 
         private NetworkMessage getNetworkMessage()

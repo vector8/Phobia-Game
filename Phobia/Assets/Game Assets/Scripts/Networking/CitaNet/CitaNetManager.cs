@@ -14,6 +14,7 @@ namespace CitaNet
 
         private Dictionary<int, GameObjNetObjPair> networkedObjects = new Dictionary<int, GameObjNetObjPair>();
         private bool initialized = false;
+        private int maxID = 0;
 
         public static CitaNetManager getInstance()
         {
@@ -53,8 +54,14 @@ namespace CitaNet
             }
         }
 
-        public void registerNetworkedObject(GameObject gObj, NetworkedObject netObj)
+        /**
+         * This method should only be called in the Start() function.
+         */
+        public void registerNetworkedObject(GameObject gObj, ref NetworkedObject netObj)
         {
+            netObj.networkID = maxID;
+            maxID++;
+            print("Name: " + gObj.name + " ID: " + netObj.networkID);
             GameObjNetObjPair objs;
             objs.gObj = gObj;
             objs.netObj = netObj;
