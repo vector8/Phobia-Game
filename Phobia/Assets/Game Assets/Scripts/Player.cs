@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     {
         public GameObject controllerGO;
         public Transform controllerTransform;
+        public CharacterController characterController;
         public NumberDisplayController batteryNumberUI;
         public SpriteRenderer batteryFillUI, batteryOutlineUI;
         public GameObject batteryFillScalePivot;
@@ -87,10 +88,20 @@ public class Player : MonoBehaviour
     private float healthRegenDelayTimer = 0f;
 
     // networking stuff
+    [Header("Networking")]
+    public float deadReckoningDistanceThreshold = 1f;
+    public float deadReckoningAngleThreshold = 15f;
+    public float deadReckoningCorrectionTime = 1f;
+    public bool lerpDeadReckoningCorrections = true;
     private NetworkedObject netObj;
-    private float networkUpdateTimer = 0f;
-    private Vector3 prevPosSent = new Vector3();
-    private Vector3 prevRotSent = new Vector3();
+    private Vector3 lastPosition = new Vector3();
+    private Vector3 deadReckoningTargetPosition = new Vector3();
+    private Vector3 deadReckoningTargetRotation = new Vector3();
+    private Vector3 lastRotation = new Vector3();
+    private Vector3 lastVelocity = new Vector3();
+    private float lastSendTime;
+    private bool deadReckoningNeedsCorrection = false;
+    private float deadReckoningCorrectionTimer = 0f;
 
     // Use this for initialization
     void Start()
@@ -146,12 +157,12 @@ public class Player : MonoBehaviour
     {
         if (playMode != PlayMode.Remote && !dead && !won)
         {
-            if(healthRegenDelayTimer > 0f)
+            if (healthRegenDelayTimer > 0f)
             {
                 healthRegenDelayTimer -= Time.deltaTime;
             }
 
-            if(health < MAX_HEALTH && healthRegenDelayTimer <= 0f)
+            if (health < MAX_HEALTH && healthRegenDelayTimer <= 0f)
             {
                 health += HEALTH_REGEN_PER_SECOND * Time.deltaTime;
                 setDamageOverlayAlpha();
@@ -163,16 +174,49 @@ public class Player : MonoBehaviour
                 updateFlashlight();
             }
 
-            networkUpdateTimer += Time.deltaTime;
-            if (networkUpdateTimer >= networkUpdateDelay &&
-                    (controllerElements.controllerTransform.position != prevPosSent || controllerElements.controllerTransform.rotation.eulerAngles.y != prevRotSent.y ||
-                    Camera.main.transform.rotation.eulerAngles.x != prevRotSent.x))
+            // predict where the remote host sees us based on the last velocity sent
+            Vector3 predictedPosition = lastPosition + (Time.time - lastSendTime) * lastVelocity;
+            if (Vector3.Distance(controllerElements.controllerTransform.position, predictedPosition) > deadReckoningDistanceThreshold ||
+                Mathf.Abs(Mathf.DeltaAngle(controllerElements.controllerTransform.rotation.eulerAngles.y, lastRotation.y)) > deadReckoningAngleThreshold ||
+                Mathf.Abs(Mathf.DeltaAngle(Camera.main.transform.rotation.eulerAngles.x, lastRotation.x)) > deadReckoningAngleThreshold)
             {
-                networkUpdateTimer = 0f;
                 netObj.sendNetworkUpdate();
-                prevPosSent = controllerElements.controllerTransform.position;
-                prevRotSent.y = controllerElements.controllerTransform.rotation.eulerAngles.y;
-                prevRotSent.x = Camera.main.transform.rotation.eulerAngles.x;
+            }
+        }
+        else if (playMode == PlayMode.Remote && !dead && !won)
+        {
+            if (deadReckoningNeedsCorrection)
+            {
+                if (lerpDeadReckoningCorrections)
+                {
+                    deadReckoningCorrectionTimer += Time.deltaTime;
+
+                    if (deadReckoningCorrectionTimer >= deadReckoningCorrectionTime)
+                    {
+                        deadReckoningCorrectionTimer = deadReckoningCorrectionTime;
+                        deadReckoningNeedsCorrection = false;
+                    }
+
+                    float u = deadReckoningCorrectionTimer / deadReckoningCorrectionTime;
+
+                    remoteHuman.transform.position = Vector3.Lerp(lastPosition, deadReckoningTargetPosition, u);
+
+                    Vector3 currentRotation = new Vector3(Mathf.LerpAngle(lastRotation.x, deadReckoningTargetRotation.x, u), Mathf.LerpAngle(lastRotation.y, deadReckoningTargetRotation.y, u));
+
+                    remoteHuman.transform.rotation = Quaternion.Euler(new Vector3(0f, currentRotation.y, 0f));
+                    remoteFlashlight.transform.localRotation = Quaternion.Euler(new Vector3(currentRotation.x, 0f, 0f));
+                }
+                else
+                {
+                    remoteHuman.transform.position = deadReckoningTargetPosition;
+                    remoteHuman.transform.rotation = Quaternion.Euler(new Vector3(0f, deadReckoningTargetRotation.y, 0f));
+                    remoteFlashlight.transform.localRotation = Quaternion.Euler(new Vector3(deadReckoningTargetRotation.x, 0f, 0f));
+                    deadReckoningNeedsCorrection = false;
+                }
+            }
+            else
+            {
+                remoteHuman.transform.position += Time.deltaTime * lastVelocity;
             }
         }
     }
@@ -182,11 +226,20 @@ public class Player : MonoBehaviour
         msg.setFloat("PX", controllerElements.controllerTransform.position.x);
         msg.setFloat("PY", controllerElements.controllerTransform.position.y - 3.3f); // too slow! (controllerElements.controller.GetComponent<CharacterController>().height / 2f));
         msg.setFloat("PZ", controllerElements.controllerTransform.position.z);
+        msg.setFloat("VX", controllerElements.characterController.velocity.x);
+        msg.setFloat("VY", controllerElements.characterController.velocity.y);
+        msg.setFloat("VZ", controllerElements.characterController.velocity.z);
         msg.setFloat("RY", controllerElements.controllerTransform.rotation.eulerAngles.y);
         msg.setFloat("RX", Camera.main.transform.rotation.eulerAngles.x);
         msg.setBool("F", controllerElements.flashlight.gameObject.activeSelf);
         msg.setBool("D", dead);
         msg.setBool("W", won);
+
+        lastPosition = controllerElements.controllerTransform.position;
+        lastVelocity = controllerElements.characterController.velocity;
+        lastRotation.y = controllerElements.controllerTransform.rotation.eulerAngles.y;
+        lastRotation.x = Camera.main.transform.rotation.eulerAngles.x;
+        lastSendTime = Time.time;
     }
 
     private void customNetworkMessageHandler(NetworkMessage msg)
@@ -197,24 +250,27 @@ public class Player : MonoBehaviour
         msg.getFloat("PX", out xPos);
         msg.getFloat("PY", out yPos);
         msg.getFloat("PZ", out zPos);
+        msg.getFloat("VX", out lastVelocity.x);
+        msg.getFloat("VY", out lastVelocity.y);
+        msg.getFloat("VZ", out lastVelocity.z);
         msg.getFloat("RX", out xRot);
         msg.getFloat("RY", out yRot);
         msg.getBool("F", out remoteFlashlightOn);
         msg.getBool("D", out dead);
         msg.getBool("W", out won);
 
-        remoteHuman.transform.position = new Vector3(xPos, yPos, zPos);
-        remoteHuman.transform.rotation = Quaternion.Euler(new Vector3(0f, yRot, 0f));
-        remoteFlashlight.transform.localRotation = Quaternion.Euler(new Vector3(xRot, 0f, 0f));
+        deadReckoningNeedsCorrection = true;
+        deadReckoningCorrectionTimer = 0f;
+        lastPosition = remoteHuman.transform.position;
+        lastRotation = new Vector3(remoteFlashlight.transform.rotation.eulerAngles.x, remoteHuman.transform.localRotation.eulerAngles.y, 0f);
+        // we need to correct our position, so predict where we should be after deadReckoningCorrectionTime and we will lerp there
+        deadReckoningTargetPosition = new Vector3(xPos, yPos, zPos);
+        if (lerpDeadReckoningCorrections)
+        {
+            deadReckoningTargetPosition += deadReckoningCorrectionTime * lastVelocity;
+        }
+        deadReckoningTargetRotation = new Vector3(xRot, yRot, 0f);
         remoteFlashlight_light.SetActive(remoteFlashlightOn);
-
-        //Vector3 euler = transform.rotation.eulerAngles;
-        //euler.y = yRot;
-        //transform.rotation = Quaternion.Euler(euler);
-
-        //euler = m_Camera.transform.rotation.eulerAngles;
-        //euler.x = xRot;
-        //m_Camera.transform.rotation = Quaternion.Euler(euler);
     }
 
     private void updateFlashlight()
@@ -229,7 +285,6 @@ public class Player : MonoBehaviour
                 controllerElements.flashlight.gameObject.SetActive(flashlightOn);
 
                 // update remote host with new flashlight info.
-                networkUpdateTimer = 0f;
                 netObj.sendNetworkUpdate();
 
                 tutorial1Text.SetActive(false);
@@ -241,7 +296,7 @@ public class Player : MonoBehaviour
             {
                 batteryLevel -= batteryDrainRate * Time.deltaTime;
 
-                if(batteryLevel <= 50f && !reloaded && numberOfBatteries > 0)
+                if (batteryLevel <= 50f && !reloaded && numberOfBatteries > 0)
                 {
                     tutorial2Text.SetActive(true);
                 }
@@ -333,7 +388,6 @@ public class Player : MonoBehaviour
                 updateBatteryUI();
 
                 // update remote host with new flashlight info.
-                networkUpdateTimer = 0f;
                 netObj.sendNetworkUpdate();
             }
         }
@@ -348,7 +402,6 @@ public class Player : MonoBehaviour
             controllerElements.flashlight.gameObject.SetActive(false);
 
             // update remote host with new flashlight info.
-            networkUpdateTimer = 0f;
             netObj.sendNetworkUpdate();
         }
     }
@@ -404,7 +457,6 @@ public class Player : MonoBehaviour
             dead = true;
             controllerElements.loseOverlay.SetActive(true);
             controllerElements.controllerScript.enabled = false;
-            networkUpdateTimer = 0f;
             netObj.sendNetworkUpdate();
         }
     }
@@ -414,7 +466,6 @@ public class Player : MonoBehaviour
         won = true;
         controllerElements.winOverlay.SetActive(true);
         controllerElements.controllerScript.enabled = false;
-        networkUpdateTimer = 0f;
         netObj.sendNetworkUpdate();
     }
 

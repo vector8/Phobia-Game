@@ -59,9 +59,9 @@ namespace CitaNet
          */
         public void registerNetworkedObject(GameObject gObj, ref NetworkedObject netObj)
         {
-            netObj.networkID = maxID;
-            maxID++;
-            print("Name: " + gObj.name + " ID: " + netObj.networkID);
+            //netObj.networkID = maxID;
+            //maxID++;
+            //print("Name: " + gObj.name + " ID: " + netObj.networkID);
             GameObjNetObjPair objs;
             objs.gObj = gObj;
             objs.netObj = netObj;
