@@ -250,6 +250,8 @@ GameObject:
   - 81: {fileID: 8112160}
   - 114: {fileID: 11461582}
   - 114: {fileID: 11461484}
+  - 114: {fileID: 11430150}
+  - 114: {fileID: 11401530}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: MainCamera
@@ -353,7 +355,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &143590
 GameObject:
   m_ObjectHideFlags: 1
@@ -2179,6 +2181,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b535070346aca5943826e158478d71ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &11401530
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 130952}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea59781cad112c75d0008dfa8d76c639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shader: {fileID: 4800000, guid: 67f8781cad112c75d0008dfa8d76c639, type: 3}
+  textureRamp: {fileID: 2800000, guid: 57005722e76843043a0db8770696929c, type: 3}
 --- !u!114 &11405072
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2443,6 +2458,142 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 8bc94ec6ed537e743b481638bdcd503d, type: 3}
   m_JumpSound: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   m_LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
+--- !u!114 &11430150
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 130952}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd999d1b2cf94a45a5b0a47ce074bef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  redChannel:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  greenChannel:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  blueChannel:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  useDepthCorrection: 0
+  zCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  depthRedChannel:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  depthGreenChannel:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  depthBlueChannel:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  saturation: 1
+  selectiveCc: 0
+  selectiveFromColor: {r: 1, g: 1, b: 1, a: 1}
+  selectiveToColor: {r: 1, g: 1, b: 1, a: 1}
+  mode: 0
+  updateTextures: 1
+  colorCorrectionCurvesShader: {fileID: 4800000, guid: 62bcade1028c24ca1a39760ed84b9487,
+    type: 3}
+  simpleColorCorrectionCurvesShader: {fileID: 4800000, guid: 438ddd58d82c84d9eb1fdc56111702e1,
+    type: 3}
+  colorCorrectionSelectiveShader: {fileID: 4800000, guid: e515e0f94cefc4c0db54b45cba621544,
+    type: 3}
 --- !u!114 &11430932
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2729,7 +2880,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 23
+  networkID: 37
 --- !u!114 &11454878
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2802,7 +2953,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4975a6e437fc3b149a8cd508ce5bdd69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  threshold: 0.202
+  threshold: 0.6
   intensity: 2.5
   blurSize: 5.5
   blurIterations: 2
@@ -2883,6 +3034,7 @@ MonoBehaviour:
   mouseElements:
     controllerGO: {fileID: 141764}
     controllerTransform: {fileID: 445424}
+    characterController: {fileID: 14363076}
     batteryNumberUI: {fileID: 11481502}
     batteryFillUI: {fileID: 21223366}
     batteryOutlineUI: {fileID: 21264668}
@@ -2900,6 +3052,7 @@ MonoBehaviour:
   hydraElements:
     controllerGO: {fileID: 184164}
     controllerTransform: {fileID: 458646}
+    characterController: {fileID: 14309296}
     batteryNumberUI: {fileID: 11421212}
     batteryFillUI: {fileID: 21240638}
     batteryOutlineUI: {fileID: 21262346}
@@ -2917,6 +3070,7 @@ MonoBehaviour:
   controllerElements:
     controllerGO: {fileID: 0}
     controllerTransform: {fileID: 0}
+    characterController: {fileID: 0}
     batteryNumberUI: {fileID: 0}
     batteryFillUI: {fileID: 0}
     batteryOutlineUI: {fileID: 0}
@@ -2956,6 +3110,10 @@ MonoBehaviour:
   tutorial1Text: {fileID: 116568}
   tutorial2Text: {fileID: 138174}
   tutorialArea: {fileID: 0}
+  deadReckoningDistanceThreshold: 1
+  deadReckoningAngleThreshold: 15
+  deadReckoningCorrectionTime: 1
+  lerpDeadReckoningCorrections: 1
 --- !u!114 &11473114
 MonoBehaviour:
   m_ObjectHideFlags: 1

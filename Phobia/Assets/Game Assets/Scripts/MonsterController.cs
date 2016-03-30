@@ -39,6 +39,7 @@ public class MonsterController : MonoBehaviour
     public Camera topDownCam, transitionCam;
     public GameObject topDownParent, fpsParent, monsterLight;
     public GameObject firstPersonController, interactionIcon;
+    public CharacterController characterController;
     public float scrollSpeedMultiplier = 1f;
     public MonsterAbilities currentAbility = MonsterAbilities.None;
     public bool isFirstPerson = false;
@@ -72,16 +73,30 @@ public class MonsterController : MonoBehaviour
     private bool gameOver = false;
 
     // networking
+    [Header("Networking")]
+    public float deadReckoningDistanceThreshold = 1f;
+    public float deadReckoningAngleThreshold = 15f;
+    public float deadReckoningCorrectionTime = 1f;
+    public bool lerpDeadReckoningCorrections = true;
     private NetworkedObject netObj;
-    private float networkUpdateTimer = 0f;
     private NetworkMessage networkMessageToSend;
     private GameObject remoteMorphSpawned = null;
-    private Vector3 prevPosSent = new Vector3();
-    private Vector3 prevRotSent = new Vector3();
+    private Vector3 lastPosition = new Vector3();
+    private Vector3 deadReckoningTargetPosition = new Vector3();
+    private Vector3 deadReckoningTargetRotation = new Vector3();
+    private Vector3 lastRotation = new Vector3();
+    private Vector3 lastVelocity = new Vector3();
+    private float lastSendTime;
+    private bool deadReckoningNeedsCorrection = false;
+    private float deadReckoningCorrectionTimer = 0f;
 
     private void customizeNetworkMessage(ref NetworkMessage msg)
     {
         msg = networkMessageToSend;
+        lastSendTime = Time.time;
+        lastPosition = firstPersonController.transform.position;
+        lastVelocity = characterController.velocity;
+        lastRotation.y = firstPersonController.transform.rotation.eulerAngles.y;
     }
 
     private void customNetworkMessageHandler(NetworkMessage msg)
@@ -98,6 +113,9 @@ public class MonsterController : MonoBehaviour
         msg.getFloat("PX", out position.x);
         msg.getFloat("PY", out position.y);
         msg.getFloat("PZ", out position.z);
+        msg.getFloat("VX", out lastVelocity.x);
+        msg.getFloat("VY", out lastVelocity.y);
+        msg.getFloat("VZ", out lastVelocity.z);
         msg.getFloat("RY", out orientation.y);
 
         switch (type)
@@ -123,8 +141,12 @@ public class MonsterController : MonoBehaviour
             case MonsterNetworkMessageType.MorphMoved:
                 if (remoteMorphSpawned != null)
                 {
-                    remoteMorphSpawned.transform.position = position;
-                    remoteMorphSpawned.transform.rotation = Quaternion.Euler(orientation);
+                    lastPosition = remoteMorphSpawned.transform.position;
+                    lastRotation = remoteMorphSpawned.transform.rotation.eulerAngles;
+                    deadReckoningTargetPosition = position;
+                    deadReckoningTargetRotation = orientation;
+                    deadReckoningNeedsCorrection = true;
+                    deadReckoningCorrectionTimer = 0f;
                 }
                 break;
             case MonsterNetworkMessageType.PlayerHit:
@@ -144,6 +166,9 @@ public class MonsterController : MonoBehaviour
         networkMessageToSend.setFloat("PX", position.x);
         networkMessageToSend.setFloat("PY", position.y);
         networkMessageToSend.setFloat("PZ", position.z);
+        networkMessageToSend.setFloat("VX", characterController.velocity.x);
+        networkMessageToSend.setFloat("VY", characterController.velocity.y);
+        networkMessageToSend.setFloat("VZ", characterController.velocity.z);
         networkMessageToSend.setFloat("RY", orientation.y);
     }
 
@@ -201,6 +226,37 @@ public class MonsterController : MonoBehaviour
                 }
 
                 updateLocal();
+            }
+        }
+        else if(remoteMorphSpawned != null)
+        {
+            if (deadReckoningNeedsCorrection)
+            {
+                if (lerpDeadReckoningCorrections)
+                {
+                    deadReckoningCorrectionTimer += Time.deltaTime;
+
+                    if (deadReckoningCorrectionTimer >= deadReckoningCorrectionTime)
+                    {
+                        deadReckoningCorrectionTimer = deadReckoningCorrectionTime;
+                        deadReckoningNeedsCorrection = false;
+                    }
+
+                    float u = deadReckoningCorrectionTimer / deadReckoningCorrectionTime;
+
+                    remoteMorphSpawned.transform.position = Vector3.Lerp(lastPosition, deadReckoningTargetPosition, u);
+                    remoteMorphSpawned.transform.rotation = Quaternion.Euler(0f, Mathf.LerpAngle(lastRotation.y, deadReckoningTargetRotation.y, u), 0f);
+                }
+                else
+                {
+                    remoteMorphSpawned.transform.position = deadReckoningTargetPosition;
+                    remoteMorphSpawned.transform.rotation = Quaternion.Euler(0f, deadReckoningTargetRotation.y, 0f);
+                    deadReckoningNeedsCorrection = false;
+                }
+            }
+            else
+            {
+                remoteMorphSpawned.transform.position += Time.deltaTime * lastVelocity;
             }
         }
     }
@@ -429,17 +485,15 @@ public class MonsterController : MonoBehaviour
             }
             else
             {
-                networkUpdateTimer += Time.deltaTime;
-                if (networkUpdateTimer >= networkUpdateDelay && 
-                    (firstPersonController.transform.position != prevPosSent || firstPersonController.transform.rotation.eulerAngles != prevRotSent))
+                // predict where the remote host sees us based on the last velocity sent
+                Vector3 predictedPosition = lastPosition + (Time.time - lastSendTime) * lastVelocity;
+                if (Vector3.Distance(firstPersonController.transform.position, predictedPosition) > deadReckoningDistanceThreshold ||
+                    Mathf.Abs(Mathf.DeltaAngle(firstPersonController.transform.rotation.eulerAngles.y, lastRotation.y)) > deadReckoningAngleThreshold)
                 {
-                    networkUpdateTimer = 0f;
                     Vector3 pos = firstPersonController.transform.position;
                     pos.y -= 2.5f; // too slow to get the actual controller's height.. otherwise i need to store it and meh.
                     buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, "", pos, firstPersonController.transform.rotation.eulerAngles);
                     netObj.sendNetworkUpdate();
-                    prevPosSent = firstPersonController.transform.position;
-                    prevRotSent = firstPersonController.transform.rotation.eulerAngles;
                 }
 
                 // check for interaction

@@ -1162,7 +1162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 45
+  networkID: 1
 --- !u!114 &11448752
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1322,7 +1322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 46
+  networkID: 66
 --- !u!114 &11475972
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1550,7 +1550,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9361736fa02676341896d43c4cad4838, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MORPH_COOLDOWN: 30
+  MORPH_COOLDOWN: 1
   MAX_TIME_IN_LIGHT: 1
   MAX_MORPH_TIME: 20
   MELEE_RANGE: 5
@@ -1563,6 +1563,7 @@ MonoBehaviour:
   monsterLight: {fileID: 188182}
   firstPersonController: {fileID: 170210}
   interactionIcon: {fileID: 141122}
+  characterController: {fileID: 14391224}
   scrollSpeedMultiplier: 1
   currentAbility: 0
   isFirstPerson: 0
@@ -1586,6 +1587,10 @@ MonoBehaviour:
   winOverlayTopdown: {fileID: 129922}
   loseOverlayFPS: {fileID: 163566}
   loseOverlayTopdown: {fileID: 151652}
+  deadReckoningDistanceThreshold: 1
+  deadReckoningAngleThreshold: 15
+  deadReckoningCorrectionTime: 0.25
+  lerpDeadReckoningCorrections: 1
 --- !u!124 &12436968
 Behaviour:
   m_ObjectHideFlags: 1
