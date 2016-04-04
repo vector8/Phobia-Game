@@ -29366,7 +29366,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a4cdaa68ae3b964c80faa1a9c270ad7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  artificialLag: 1
+  artificialLag: 0
 --- !u!4 &627806098
 Transform:
   m_ObjectHideFlags: 0
@@ -48047,7 +48047,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75c89941549a1a344a790e4ea25b1164, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playingAs: 0
+  playingAs: 1
   humanControlScheme: 0
   serverAddress: 127.0.0.1
   portNumber: 8888
@@ -52032,31 +52032,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2be9b4e555aa5d64d9d420937a537f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterController: {fileID: 1275490740}
-  buttons:
-  - name: 536f756e64
-    icon: {fileID: 1275490745}
-    background: {fileID: 1275490746}
-    ability: 0
-  - name: 54726170
-    icon: {fileID: 1275490743}
-    background: {fileID: 1275490744}
-    ability: 0
-  - name: 4d6f727068
-    icon: {fileID: 1275490741}
-    background: {fileID: 1275490742}
-    ability: 0
-  inactiveColor:
-    r: 1
-    g: 1
-    b: 1
-    a: 1
-  activeColor:
-    r: 1
-    g: 0.9724138
-    b: 0
-    a: 1
-  lastAbility: 0
 --- !u!114 &1104649298
 MonoBehaviour:
   m_ObjectHideFlags: 0
