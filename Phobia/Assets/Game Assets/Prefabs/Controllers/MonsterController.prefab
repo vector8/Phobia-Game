@@ -285,7 +285,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &163566
 GameObject:
   m_ObjectHideFlags: 1
@@ -1162,7 +1162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 1
+  networkID: 34
 --- !u!114 &11448752
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1322,7 +1322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a991f6c1198b8fd44a64bb841c1f5859, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  networkID: 66
+  networkID: 33
 --- !u!114 &11475972
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1337,11 +1337,14 @@ MonoBehaviour:
   monsterController: {fileID: 11490490}
   buttons:
   - name: Sound
-    image: {fileID: 11446986}
+    icon: {fileID: 11446986}
+    background: {fileID: 11412892}
   - name: Trap
-    image: {fileID: 11422622}
+    icon: {fileID: 11422622}
+    background: {fileID: 11421938}
   - name: Morph
-    image: {fileID: 11421400}
+    icon: {fileID: 11421400}
+    background: {fileID: 11490234}
   inactiveColor: {r: 1, g: 1, b: 1, a: 1}
   activeColor: {r: 1, g: 0.9724138, b: 0, a: 1}
 --- !u!114 &11477058

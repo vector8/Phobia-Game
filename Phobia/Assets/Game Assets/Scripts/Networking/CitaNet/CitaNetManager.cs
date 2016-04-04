@@ -12,7 +12,9 @@ namespace CitaNet
             public NetworkedObject netObj;
         }
 
+        public float artificialLag = 0f;
         private Dictionary<int, GameObjNetObjPair> networkedObjects = new Dictionary<int, GameObjNetObjPair>();
+        private Queue<NetworkMessage> messageQueue = new Queue<NetworkMessage>();
         private bool initialized = false;
         private int maxID = 0;
 
@@ -31,6 +33,15 @@ namespace CitaNet
         {
             if (initialized)
             {
+                if (Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    artificialLag += 0.5f;
+                }
+                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    artificialLag -= 0.5f;
+                }
+
                 bool received = CitaNetWrapper.hasReceived();
                 checkErrors();
                 if (received)
@@ -50,6 +61,14 @@ namespace CitaNet
                             objs.netObj.receiveNetworkMessage(msg);
                         }
                     }
+                }
+
+                // process send queue
+                while(messageQueue.Count > 0 && Time.time >= messageQueue.Peek().sendTime + artificialLag)
+                {
+                    print("sending message at " + Time.time);
+                    NetworkMessage msg = messageQueue.Dequeue();
+                    CitaNetWrapper.sendMsg(msg.ToString());
                 }
             }
         }
@@ -115,10 +134,9 @@ namespace CitaNet
 
         public void sendMessage(NetworkMessage msg)
         {
-            if (initialized)
-            {
-                CitaNetWrapper.sendMsg(msg.ToString());
-            }
+            msg.sendTime = Time.time;
+            print("queuing message at " + msg.sendTime);
+            messageQueue.Enqueue(msg);
         }
 
         void OnApplicationQuit()
