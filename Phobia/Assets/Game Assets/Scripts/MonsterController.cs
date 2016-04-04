@@ -7,55 +7,74 @@ public class MonsterController : MonoBehaviour
     public enum MonsterAbilities
     {
         None,
-        Sound,
-        Trap,
-        Morph
+        CrashSound,
+        GlassSound,
+        JackInTheBox,
+        TeddyBear,
+        Wind,
+        ClownMorph,
+        GirlMorph
     }
 
     [System.Serializable]
-    public struct StringPrefabDictEntry
+    public struct SpawnAbilityPrefabEntry
     {
-        public string name;
+        public MonsterAbilities ability;
         public GameObject prefab;
+    }
+
+    [System.Serializable]
+    public struct AbilityCooldownEntry
+    {
+        public MonsterAbilities ability;
+        public float cooldown;
     }
 
     public enum MonsterNetworkMessageType
     {
-        SoundSpawned = 0,
-        TrapSpawned,
-        MorphSpawned,
+        Spawn = 0,
         MorphDespawned,
         MorphMoved,
         PlayerHit
     }
 
-    public float MORPH_COOLDOWN;
+    [Header("Constants")]
     public float MAX_TIME_IN_LIGHT;
     public float MAX_MORPH_TIME;
     public float MELEE_RANGE;
     public float MELEE_DAMAGE;
     public Vector4 TOP_DOWN_CAMERA_EXTENTS;
 
+    [Header("Abilities")]
+    public GameObject windPreview;
+    private GameObject currentAbilityPreview;
+
+    public Dictionary<MonsterAbilities, float> abilityCooldowns;
+    public Dictionary<MonsterAbilities, float> abilityCooldownTimers;
+    public Dictionary<MonsterAbilities, GameObject> monsterSpawnPrefabs;
+
+    [SerializeField]
+    private AbilityCooldownEntry[] abilityCooldownsArray;
+    [SerializeField]
+    private SpawnAbilityPrefabEntry[] monsterSpawnPrefabsArray;
+
+    [Header("Operational")]
     public Camera topDownCam, transitionCam;
     public GameObject topDownParent, fpsParent, monsterLight;
     public GameObject firstPersonController, interactionIcon;
     public CharacterController characterController;
-    public float scrollSpeedMultiplier = 1f;
     public MonsterAbilities currentAbility = MonsterAbilities.None;
+    public float scrollSpeedMultiplier = 1f;
     public bool isFirstPerson = false;
     public bool isLocal;
     public float networkUpdateDelay;
     public bool allowMouseMove;
-    public float morphCooldownTimer = 0f;
     public float inLightTimer = 0f;
     public float morphDurationTimer = 0f;
 
     public Player player;
     public Light playerLight;
     public Collider entryLightCollider;
-
-    public StringPrefabDictEntry[] monsterSpawnPrefabs;
-    public Dictionary<string, GameObject> monsterSpawnPrefabsDict;
 
     public GameObject winOverlayFPS, winOverlayTopdown, loseOverlayFPS, loseOverlayTopdown;
 
@@ -90,6 +109,29 @@ public class MonsterController : MonoBehaviour
     private bool deadReckoningNeedsCorrection = false;
     private float deadReckoningCorrectionTimer = 0f;
 
+    // Use this for initialization
+    void Start()
+    {
+        abilityCooldowns = new Dictionary<MonsterAbilities, float>();
+        abilityCooldownTimers = new Dictionary<MonsterAbilities, float>();
+        foreach (AbilityCooldownEntry e in abilityCooldownsArray)
+        {
+            abilityCooldowns.Add(e.ability, e.cooldown);
+            abilityCooldownTimers.Add(e.ability, e.cooldown);
+        }
+
+        monsterSpawnPrefabs = new Dictionary<MonsterAbilities, GameObject>();
+        foreach (SpawnAbilityPrefabEntry e in monsterSpawnPrefabsArray)
+        {
+            monsterSpawnPrefabs.Add(e.ability, e.prefab);
+        }
+
+        // init network stuff
+        netObj = GetComponent<NetworkedObject>();
+        netObj.customNetworkMessageFunc = customizeNetworkMessage;
+        netObj.customNetworkMessageHandler = customNetworkMessageHandler;
+    }
+
     private void customizeNetworkMessage(ref NetworkMessage msg)
     {
         msg = networkMessageToSend;
@@ -106,8 +148,9 @@ public class MonsterController : MonoBehaviour
 
         MonsterNetworkMessageType type = (MonsterNetworkMessageType)msgType;
 
-        string name;
-        msg.getString("N", out name);
+        int abilityID;
+        msg.getInt("A", out abilityID);
+        MonsterAbilities ability = (MonsterAbilities)abilityID;
         Vector3 position = new Vector3();
         Vector3 orientation = new Vector3();
         msg.getFloat("PX", out position.x);
@@ -120,17 +163,13 @@ public class MonsterController : MonoBehaviour
 
         switch (type)
         {
-            case MonsterNetworkMessageType.SoundSpawned:
-                GameObject sound = Instantiate(monsterSpawnPrefabsDict[name]);
-                sound.transform.position = position;
-                break;
-            case MonsterNetworkMessageType.TrapSpawned:
-                GameObject trap = Instantiate(monsterSpawnPrefabsDict[name]);
-                trap.transform.position = position;
-                break;
-            case MonsterNetworkMessageType.MorphSpawned:
-                remoteMorphSpawned = Instantiate(monsterSpawnPrefabsDict[name]);
-                remoteMorphSpawned.transform.position = position;
+            case MonsterNetworkMessageType.Spawn:
+                GameObject spawn = Instantiate(monsterSpawnPrefabs[ability]);
+                spawn.transform.position = position;
+                if (ability == MonsterAbilities.ClownMorph || ability == MonsterAbilities.GirlMorph)
+                {
+                    remoteMorphSpawned = spawn;
+                }
                 break;
             case MonsterNetworkMessageType.MorphDespawned:
                 if (remoteMorphSpawned != null)
@@ -157,12 +196,12 @@ public class MonsterController : MonoBehaviour
         }
     }
 
-    private void buildNetworkMessage(MonsterNetworkMessageType type, string nameOfSpawn = "", Vector3 position = new Vector3(), Vector3 orientation = new Vector3())
+    private void buildNetworkMessage(MonsterNetworkMessageType type, MonsterAbilities ability = MonsterAbilities.None, Vector3 position = new Vector3(), Vector3 orientation = new Vector3())
     {
         networkMessageToSend = new NetworkMessage();
         networkMessageToSend.setInt(NetworkedObject.ID_KEY, netObj.networkID);
         networkMessageToSend.setInt("T", (int)type);
-        networkMessageToSend.setString("N", nameOfSpawn);
+        networkMessageToSend.setInt("A", (int)ability);
         networkMessageToSend.setFloat("PX", position.x);
         networkMessageToSend.setFloat("PY", position.y);
         networkMessageToSend.setFloat("PZ", position.z);
@@ -186,29 +225,12 @@ public class MonsterController : MonoBehaviour
         }
     }
 
-    // Use this for initialization
-    void Start()
-    {
-        morphCooldownTimer = MORPH_COOLDOWN;
-
-        monsterSpawnPrefabsDict = new Dictionary<string, GameObject>();
-        foreach (StringPrefabDictEntry e in monsterSpawnPrefabs)
-        {
-            monsterSpawnPrefabsDict.Add(e.name, e.prefab);
-        }
-
-        // init network stuff
-        netObj = GetComponent<NetworkedObject>();
-        netObj.customNetworkMessageFunc = customizeNetworkMessage;
-        netObj.customNetworkMessageHandler = customNetworkMessageHandler;
-    }
-
     // Update is called once per frame
     void Update()
     {
         if (isLocal)
         {
-            if(!gameOver)
+            if (!gameOver)
             {
                 if (player.won)
                 {
@@ -228,7 +250,7 @@ public class MonsterController : MonoBehaviour
                 updateLocal();
             }
         }
-        else if(remoteMorphSpawned != null)
+        else if (remoteMorphSpawned != null)
         {
             if (deadReckoningNeedsCorrection)
             {
@@ -263,9 +285,12 @@ public class MonsterController : MonoBehaviour
 
     private void updateLocal()
     {
-        if(morphCooldownTimer < MORPH_COOLDOWN)
+        foreach (AbilityCooldownEntry e in abilityCooldownsArray)
         {
-            morphCooldownTimer += Time.deltaTime;
+            if (abilityCooldownTimers[e.ability] < abilityCooldowns[e.ability])
+            {
+                abilityCooldownTimers[e.ability] += Time.deltaTime;
+            }
         }
 
         if (transitioning)
@@ -328,7 +353,14 @@ public class MonsterController : MonoBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 currentAbility = MonsterAbilities.None;
+                if (currentAbilityPreview != null)
+                {
+                    currentAbilityPreview.SetActive(false);
+                }
             }
+
+            Vector3 placementPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            placementPosition.y = 1f;
 
             if (currentAbility != MonsterAbilities.None && Input.GetMouseButtonDown(0))
             {
@@ -340,33 +372,26 @@ public class MonsterController : MonoBehaviour
                 {
                     if (hit.collider.gameObject.tag == "Floor")
                     {
-                        Vector3 placementPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                        placementPosition.y = 1f;
-
                         switch (currentAbility)
                         {
-                            case MonsterAbilities.Sound:
+                            case MonsterAbilities.CrashSound:
+                            case MonsterAbilities.GlassSound:
+                            case MonsterAbilities.TeddyBear:
+                            case MonsterAbilities.JackInTheBox:
+                            case MonsterAbilities.Wind:
                                 {
-                                    GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["PopGoesTheWeasel"]);
+                                    abilityCooldownTimers[currentAbility] = 0f;
+                                    GameObject go = Instantiate<GameObject>(monsterSpawnPrefabs[currentAbility]);
                                     go.transform.position = placementPosition;
 
-                                    buildNetworkMessage(MonsterNetworkMessageType.SoundSpawned, "PopGoesTheWeasel", placementPosition);
+                                    buildNetworkMessage(MonsterNetworkMessageType.Spawn, currentAbility, placementPosition);
                                     netObj.sendNetworkUpdate();
                                 }
                                 break;
-                            case MonsterAbilities.Trap:
+                            case MonsterAbilities.ClownMorph:
+                            case MonsterAbilities.GirlMorph:
                                 {
-                                    GameObject go = Instantiate<GameObject>(monsterSpawnPrefabsDict["JackInTheBox"]);
-                                    go.transform.position = placementPosition;
-
-                                    buildNetworkMessage(MonsterNetworkMessageType.TrapSpawned, "JackInTheBox", placementPosition);
-                                    netObj.sendNetworkUpdate();
-                                }
-                                break;
-                            case MonsterAbilities.Morph:
-                                if (morphCooldownTimer >= MORPH_COOLDOWN)
-                                {
-                                    morphCooldownTimer = 0f;
+                                    abilityCooldownTimers[currentAbility] = 0f;
                                     transitionCam.transform.position = topDownCam.transform.position;
                                     transitionCam.transform.rotation = topDownCam.transform.rotation;
                                     transitioning = true;
@@ -379,22 +404,24 @@ public class MonsterController : MonoBehaviour
                                     transitionCam.gameObject.SetActive(true);
                                     topDownParent.SetActive(false);
 
-                                    buildNetworkMessage(MonsterNetworkMessageType.MorphSpawned, "Clown", firstPersonController.transform.position);
+                                    buildNetworkMessage(MonsterNetworkMessageType.Spawn, currentAbility, firstPersonController.transform.position);
                                     netObj.sendNetworkUpdate();
 
                                     Cursor.lockState = CursorLockMode.Locked;
                                     Cursor.visible = false;
                                 }
-                                else
-                                {
-                                    failed = true;
-                                }
                                 break;
                             default:
                                 break;
                         }
+
+                        currentAbility = MonsterAbilities.None;
+                        if (currentAbilityPreview != null)
+                        {
+                            currentAbilityPreview.SetActive(false);
+                        }
                     }
-                    else
+                    else if (hit.collider.gameObject.tag != "UI")
                     {
                         failed = true;
                     }
@@ -404,20 +431,58 @@ public class MonsterController : MonoBehaviour
                     failed = true;
                 }
 
-                if(failed)
+                if (failed)
                 {
                     // TODO: give the player some kind of feedback that they cant do this
-
+                    currentAbilityPreview.SetActive(false);
                 }
 
-                currentAbility = MonsterAbilities.None;
+            }
+            else if (currentAbility != MonsterAbilities.None)
+            {
+                if (currentAbilityPreview != null)
+                {
+                    currentAbilityPreview.SetActive(false);
+                }
+                currentAbilityPreview = null;
+
+                switch (currentAbility)
+                {
+                    case MonsterAbilities.CrashSound:
+                    case MonsterAbilities.GlassSound:
+                        // currentAbilityPreview = soundPreview;
+                        break;
+                    case MonsterAbilities.TeddyBear:
+                        // currentAbilityPreview = teddyPreview;
+                        break;
+                    case MonsterAbilities.JackInTheBox:
+                        // currentAbilityPreview = jackPreview;
+                        break;
+                    case MonsterAbilities.Wind:
+                        currentAbilityPreview = windPreview;
+                        break;
+                    case MonsterAbilities.ClownMorph:
+                        // currentAbilityPreview = clownPreview;
+                        break;
+                    case MonsterAbilities.GirlMorph:
+                        // currentAbilityPreview = girlPreview;
+                        break;
+                    default:
+                        break;
+                }
+
+                if(currentAbilityPreview != null)
+                {
+                    currentAbilityPreview.SetActive(true);
+                    currentAbilityPreview.transform.position = placementPosition;
+                }
             }
         }
         else // isFirstPerson
         {
             morphDurationTimer += Time.deltaTime;
 
-            if(firstPersonController.GetComponent<Collider>().bounds.Intersects(entryLightCollider.bounds))
+            if (firstPersonController.GetComponent<Collider>().bounds.Intersects(entryLightCollider.bounds))
             {
                 inLightTimer += Time.deltaTime;
 
@@ -428,7 +493,7 @@ public class MonsterController : MonoBehaviour
                 }
             }
             // check if we are in the player's flashlight cone
-            else if(morphDurationTimer < MAX_MORPH_TIME && (playerLight.gameObject.activeSelf))
+            else if (morphDurationTimer < MAX_MORPH_TIME && (playerLight.gameObject.activeSelf))
             {
                 Vector3 diff = firstPersonController.transform.position - playerLight.transform.position;
                 Vector3 lightAxis = playerLight.transform.forward * playerLight.range;
@@ -443,11 +508,11 @@ public class MonsterController : MonoBehaviour
 
                     if (Physics.Raycast(ray, out hit))
                     {
-                        if(hit.collider.gameObject.GetInstanceID() == firstPersonController.GetInstanceID())
+                        if (hit.collider.gameObject.GetInstanceID() == firstPersonController.GetInstanceID())
                         {
                             inLightTimer += Time.deltaTime;
 
-                            if(inLightTimer > MAX_TIME_IN_LIGHT)
+                            if (inLightTimer > MAX_TIME_IN_LIGHT)
                             {
                                 dead = true;
                                 inLightTimer = 0f;
@@ -492,7 +557,7 @@ public class MonsterController : MonoBehaviour
                 {
                     Vector3 pos = firstPersonController.transform.position;
                     pos.y -= 2.5f; // too slow to get the actual controller's height.. otherwise i need to store it and meh.
-                    buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, "", pos, firstPersonController.transform.rotation.eulerAngles);
+                    buildNetworkMessage(MonsterNetworkMessageType.MorphMoved, MonsterAbilities.None, pos, firstPersonController.transform.rotation.eulerAngles);
                     netObj.sendNetworkUpdate();
                 }
 
@@ -517,10 +582,10 @@ public class MonsterController : MonoBehaviour
                     }
 
                     Player p = hit.collider.transform.parent.GetComponent<Player>();
-                    if(p != null && hit.distance <= MELEE_RANGE)
+                    if (p != null && hit.distance <= MELEE_RANGE)
                     {
                         // TODO: set attack icon active
-                        if(Input.GetMouseButtonDown(0))
+                        if (Input.GetMouseButtonDown(0))
                         {
                             buildNetworkMessage(MonsterNetworkMessageType.PlayerHit);
                             netObj.sendNetworkUpdate();

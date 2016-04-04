@@ -8,6 +8,8 @@ namespace CitaNet
         public const char RECORD_SEPARATOR = (char)30;
         public const char UNIT_SEPARATOR = (char)31;
 
+        public float sendTime;
+
         private Dictionary<string, string> messageParts = new Dictionary<string, string>();
 
         public NetworkMessage()
