@@ -33,13 +33,17 @@ namespace CitaNet
         {
             if (initialized)
             {
-                if (Input.GetKeyDown(KeyCode.UpArrow))
+                if (Input.GetKeyDown(KeyCode.PageUp))
                 {
                     artificialLag += 0.5f;
                 }
-                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                else if (Input.GetKeyDown(KeyCode.PageDown))
                 {
                     artificialLag -= 0.5f;
+                    if(artificialLag < 0f)
+                    {
+                        artificialLag = 0f;
+                    }
                 }
 
                 bool received = CitaNetWrapper.hasReceived();
