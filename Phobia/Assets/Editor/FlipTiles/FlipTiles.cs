@@ -19,7 +19,7 @@ public class FlipTiles : EditorWindow
             foreach (GameObject go in Selection.gameObjects)
             {
                 Vector3 rot = go.transform.localEulerAngles;
-                rot.x = 90;
+                rot.z = 90;
                 go.transform.localEulerAngles = rot;
             }
         }

@@ -11,6 +11,12 @@ public class EntryDoor : Interactable
     private bool open = false;
     private float timer = 0.0f;
     private bool activated = false;
+    private AudioSource audio;
+
+    protected override void Start()
+    {
+        audio = GetComponent<AudioSource>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -45,6 +51,8 @@ public class EntryDoor : Interactable
     public override void activate(bool fromNetwork)
     {
         base.activate(fromNetwork);
+
+        audio.Play();
 
         if (open)
         {

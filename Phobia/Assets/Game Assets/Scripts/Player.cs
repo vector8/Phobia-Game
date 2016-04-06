@@ -23,7 +23,7 @@ public class Player : MonoBehaviour
         public Image damageOverlay;
         public GameObject winOverlay, loseOverlay;
         public MonoBehaviour controllerScript;
-        public AudioSource flashlightAudioSource;
+        public AudioSource audioSource;
     }
 
     public enum PlayMode
@@ -37,6 +37,7 @@ public class Player : MonoBehaviour
     public ControllerElements mouseElements;
     public ControllerElements hydraElements;
     public ControllerElements controllerElements;
+    public RightHandController rightHandController;
 
     [Header("Remote Objects")]
     public GameObject remoteHuman;
@@ -58,7 +59,9 @@ public class Player : MonoBehaviour
 
     [Header("Sounds")]
     public AudioClip flashLightClick;
-    public AudioClip flashLightFlicker;
+    public AudioClip[] hurtSounds;
+    public AudioClip reloadSound;
+    public AudioClip batteryClickSound;
     public float volumeScale;
 
     [Header("Misc")]
@@ -74,8 +77,8 @@ public class Player : MonoBehaviour
     public float health;
 
     [Header("Tutorial")]
-    public GameObject tutorial1Text;
-    public GameObject tutorial2Text;
+    public GameObject mouseTutorial;
+    public GameObject hydraTutorial;
     public GameObject tutorialArea;
     private bool reloaded = false;
 
@@ -123,10 +126,12 @@ public class Player : MonoBehaviour
             case PlayMode.Mouse:
                 controllerElements = mouseElements;
                 mouseElements.controllerGO.SetActive(true);
+                mouseTutorial.SetActive(true);
                 break;
             case PlayMode.Hydra:
                 controllerElements = hydraElements;
                 hydraElements.controllerGO.SetActive(true);
+                hydraTutorial.SetActive(true);
                 break;
             case PlayMode.Remote:
                 remoteHuman.SetActive(true);
@@ -155,6 +160,11 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.I))
+        {
+            takeDamage(20);
+        }
+
         if (playMode != PlayMode.Remote && !dead && !won)
         {
             if (healthRegenDelayTimer > 0f)
@@ -278,7 +288,7 @@ public class Player : MonoBehaviour
         if (batteryLevel > 0f)
         {
             // If flashlight button has been pressed
-            if ((playMode == PlayMode.Hydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.TWO)) || (playMode == PlayMode.Mouse && Input.GetKeyDown(KeyCode.Q)))
+            if ((playMode == PlayMode.Hydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.JOYSTICK)) || (playMode == PlayMode.Mouse && Input.GetKeyDown(KeyCode.Q)))
             {
                 // Toggle flashlight
                 flashlightOn = !flashlightOn;
@@ -287,23 +297,12 @@ public class Player : MonoBehaviour
                 // update remote host with new flashlight info.
                 netObj.sendNetworkUpdate();
 
-                tutorial1Text.SetActive(false);
-
-                controllerElements.flashlightAudioSource.PlayOneShot(flashLightClick, volumeScale);
+                controllerElements.audioSource.PlayOneShot(flashLightClick, volumeScale);
             }
 
             if (flashlightOn)
             {
                 batteryLevel -= batteryDrainRate * Time.deltaTime;
-
-                if (batteryLevel <= 50f && !reloaded && numberOfBatteries > 0)
-                {
-                    tutorial2Text.SetActive(true);
-                }
-                else
-                {
-                    tutorial2Text.SetActive(false);
-                }
 
                 updateBatteryUI();
             }
@@ -392,14 +391,13 @@ public class Player : MonoBehaviour
             }
         }
         else if (numberOfBatteries > 0 && batteryLevel < MAX_BATTERY_LEVEL - BATTERY_RELOAD_AMOUNT &&
-            ((playMode == PlayMode.Hydra && controllerElements.flashlightController.m_controller.GetButtonDown(SixenseButtons.FOUR)) || (playMode == PlayMode.Mouse && Input.GetKeyDown(KeyCode.R))))
-        // TODO: figure out which button is appropriate for hydra
+            ((playMode == PlayMode.Hydra && rightHandController.m_controller.GetButtonDown(SixenseButtons.JOYSTICK)) || (playMode == PlayMode.Mouse && Input.GetKeyDown(KeyCode.R))))
         {
             // reload
             reloaded = true;
-            tutorial2Text.SetActive(false);
             reloading = true;
             controllerElements.flashlight.gameObject.SetActive(false);
+            controllerElements.audioSource.PlayOneShot(reloadSound, volumeScale);
 
             // update remote host with new flashlight info.
             netObj.sendNetworkUpdate();
@@ -418,6 +416,7 @@ public class Player : MonoBehaviour
     {
         numberOfBatteries++;
         controllerElements.batteryNumberUI.setNumber(numberOfBatteries);
+        controllerElements.audioSource.PlayOneShot(batteryClickSound, volumeScale);
     }
 
     public void decrementBatteryCount()
@@ -431,6 +430,7 @@ public class Player : MonoBehaviour
         numberOfFuses++;
         controllerElements.fuseNumberUI.setNumber(numberOfFuses);
         controllerElements.fuseUI.SetActive(numberOfFuses > 0);
+        controllerElements.audioSource.PlayOneShot(batteryClickSound, volumeScale);
     }
 
     public void decrementFuseCount()
@@ -452,6 +452,8 @@ public class Player : MonoBehaviour
         health -= damage;
         healthRegenDelayTimer = HEALTH_REGEN_DELAY;
         setDamageOverlayAlpha();
+        controllerElements.audioSource.PlayOneShot(hurtSounds[Random.Range(0,4)], volumeScale);
+
         if (health <= 0f)
         {
             dead = true;
