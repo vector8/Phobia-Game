@@ -7,6 +7,7 @@ TagManager:
   - Floor
   - UI
   - Candle
+  - RemotePlayer
   layers:
   - Default
   - TransparentFX
