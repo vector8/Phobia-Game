@@ -252,6 +252,8 @@ public class MonsterController : MonoBehaviour
         }
         else if (remoteMorphSpawned != null)
         {
+            Vector3 posBefore = remoteMorphSpawned.transform.position;
+
             if (deadReckoningNeedsCorrection)
             {
                 if (lerpDeadReckoningCorrections)
@@ -280,6 +282,9 @@ public class MonsterController : MonoBehaviour
             {
                 remoteMorphSpawned.transform.position += Time.deltaTime * lastVelocity;
             }
+
+            Animator anim = remoteMorphSpawned.GetComponent<Animator>();
+            anim.SetBool("Moving", posBefore != remoteMorphSpawned.transform.position);
         }
     }
 
