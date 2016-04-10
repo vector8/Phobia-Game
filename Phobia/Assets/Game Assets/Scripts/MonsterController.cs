@@ -91,6 +91,8 @@ public class MonsterController : MonoBehaviour
 
     private bool gameOver = false;
 
+    public AudioClip deathSound;
+
     // networking
     [Header("Networking")]
     public float deadReckoningDistanceThreshold = 1f;
@@ -529,6 +531,9 @@ public class MonsterController : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q) || dead || morphDurationTimer > MAX_MORPH_TIME)
             {
+                AudioSource cache_AS = gameObject.GetComponent<AudioSource>();
+                cache_AS.clip = deathSound;
+                cache_AS.Play();
                 morphDurationTimer = 0f;
                 dead = false;
                 transitioning = true;
