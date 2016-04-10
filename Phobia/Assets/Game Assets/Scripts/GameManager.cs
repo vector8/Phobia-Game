@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using CitaNet;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -54,6 +55,14 @@ public class GameManager : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Period) && Input.GetKey(KeyCode.RightShift) && Input.GetKey(KeyCode.RightControl))
+        {
+            SceneManager.LoadScene("Main");
         }
     }
 }
