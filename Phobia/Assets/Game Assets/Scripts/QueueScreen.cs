@@ -8,6 +8,7 @@ public class QueueScreen : MonoBehaviour
 
     public WaitingInQueue waitingInQueueScreen;
     public LobbyClient lobby;
+    public GameObject optionsMenu;
 
     private int playingAs;
 
@@ -40,5 +41,11 @@ public class QueueScreen : MonoBehaviour
 
         gameObject.SetActive(false);
         waitingInQueueScreen.gameObject.SetActive(true);
+    }
+
+    public void optionsButtonPressed()
+    {
+        gameObject.SetActive(false);
+        optionsMenu.SetActive(true);
     }
 }
