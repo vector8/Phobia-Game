@@ -33,18 +33,18 @@ namespace CitaNet
         {
             if (initialized)
             {
-                if (Input.GetKeyDown(KeyCode.PageUp))
-                {
-                    artificialLag += 0.5f;
-                }
-                else if (Input.GetKeyDown(KeyCode.PageDown))
-                {
-                    artificialLag -= 0.5f;
-                    if(artificialLag < 0f)
-                    {
-                        artificialLag = 0f;
-                    }
-                }
+                //if (Input.GetKeyDown(KeyCode.PageUp))
+                //{
+                //    artificialLag += 0.5f;
+                //}
+                //else if (Input.GetKeyDown(KeyCode.PageDown))
+                //{
+                //    artificialLag -= 0.5f;
+                //    if(artificialLag < 0f)
+                //    {
+                //        artificialLag = 0f;
+                //    }
+                //}
 
                 bool received = CitaNetWrapper.hasReceived();
                 checkErrors();
@@ -70,7 +70,6 @@ namespace CitaNet
                 // process send queue
                 while(messageQueue.Count > 0 && Time.time >= messageQueue.Peek().sendTime + artificialLag)
                 {
-                    print("sending message at " + Time.time);
                     NetworkMessage msg = messageQueue.Dequeue();
                     CitaNetWrapper.sendMsg(msg.ToString());
                 }
@@ -139,7 +138,6 @@ namespace CitaNet
         public void sendMessage(NetworkMessage msg)
         {
             msg.sendTime = Time.time;
-            print("queuing message at " + msg.sendTime);
             messageQueue.Enqueue(msg);
         }
 
