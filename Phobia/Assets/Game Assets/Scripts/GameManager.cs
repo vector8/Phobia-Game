@@ -5,21 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public enum PlayModes
-    {
-        Human,
-        Monster
-    }
-
-    public enum HumanControlSchemes
-    {
-        Mouse,
-        Hydra
-    }
-
-
-    public PlayModes playingAs;
-    public HumanControlSchemes humanControlScheme;
+    public GameSettings.PlayModes playingAs;
+    public GameSettings.HumanControlSchemes humanControlScheme;
     public string serverAddress;
     public int portNumber;
 
@@ -33,12 +20,20 @@ public class GameManager : MonoBehaviour
     {
         citaNetMgr = CitaNetManager.getInstance();
 
+        if(GameSettings.settingsSetFromMenu)
+        {
+            playingAs = GameSettings.playingAs;
+            humanControlScheme = GameSettings.controlScheme;
+            serverAddress = GameSettings.monsterAddress;
+            portNumber = GameSettings.port;
+        }
+
         switch (playingAs)
         {
-            case PlayModes.Human:
+            case GameSettings.PlayModes.Human:
                 citaNetMgr.initAsClient(portNumber, serverAddress);
                 monsterController.setLocal(false);
-                if (humanControlScheme == HumanControlSchemes.Mouse)
+                if (humanControlScheme == GameSettings.HumanControlSchemes.Mouse)
                 {
                     playerController.setPlayMode(Player.PlayMode.Mouse);
                 }
@@ -47,7 +42,7 @@ public class GameManager : MonoBehaviour
                     playerController.setPlayMode(Player.PlayMode.Hydra);
                 }
                 break;
-            case PlayModes.Monster:
+            case GameSettings.PlayModes.Monster:
                 monsterController.setLocal(true);
                 // monster is always server because reasons
                 citaNetMgr.initAsServer(portNumber);

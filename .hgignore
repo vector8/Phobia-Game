@@ -6,3 +6,6 @@ TeaserCinematic/TeaserCinematic.sln
 Phobia/Library/*
 Phobia/Phobia.sln
 Phobia/Temp/*
+PhobiaLobbyServer/Debug/*
+PhobiaLobbyServer/PhobiaLobbyServer.VC.opendb
+PhobiaLobbyServer/PhobiaLobbyServer.sdf
