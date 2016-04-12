@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
     [Header("Remote Objects")]
     public GameObject remoteHuman;
     public GameObject remoteFlashlight;
-    public GameObject remoteFlashlight_light;
+    public Animator remoteHumanAnimator;
 
     public PlayMode playMode
     {
@@ -195,6 +195,8 @@ public class Player : MonoBehaviour
         }
         else if (playMode == PlayMode.Remote && !dead && !won)
         {
+            Vector3 posBefore = remoteHuman.transform.position;
+
             if (deadReckoningNeedsCorrection)
             {
                 if (lerpDeadReckoningCorrections)
@@ -228,6 +230,8 @@ public class Player : MonoBehaviour
             {
                 remoteHuman.transform.position += Time.deltaTime * lastVelocity;
             }
+
+            remoteHumanAnimator.SetBool("Moving", posBefore != remoteHuman.transform.position);
         }
     }
 
@@ -280,7 +284,7 @@ public class Player : MonoBehaviour
             deadReckoningTargetPosition += deadReckoningCorrectionTime * lastVelocity;
         }
         deadReckoningTargetRotation = new Vector3(xRot, yRot, 0f);
-        remoteFlashlight_light.SetActive(remoteFlashlightOn);
+        remoteFlashlight.SetActive(remoteFlashlightOn);
     }
 
     private void updateFlashlight()
