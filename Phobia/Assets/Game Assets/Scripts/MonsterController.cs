@@ -78,18 +78,18 @@ public class MonsterController : MonoBehaviour
 
     public GameObject winOverlayFPS, winOverlayTopdown, loseOverlayFPS, loseOverlayTopdown;
 
+    public AudioClip clownDeath, clownSpawn;
+
     private const float MIN_ORTHO_SIZE = 3f, MAX_ORTHO_SIZE = 50f, ORTHO_SIZE_DIFF = 47f;
     private const float MIN_ORTHO_SPEED_MULTIPLIER = 3.3333f, MAX_ORTHO_SPEED_MULTIPLIER = 1.2f;
     private const float TRANSITION_DURATION = 1f;
 
     private bool transitioning = false;
     private float transitionTimer = 0f;
-
     private Transform origin, target;
-
     private bool dead = false;
-
     private bool gameOver = false;
+    private AudioSource audioSource;
 
     // networking
     [Header("Networking")]
@@ -125,6 +125,8 @@ public class MonsterController : MonoBehaviour
         {
             monsterSpawnPrefabs.Add(e.ability, e.prefab);
         }
+
+        audioSource = gameObject.GetComponent<AudioSource>();
 
         // init network stuff
         netObj = GetComponent<NetworkedObject>();
@@ -174,6 +176,8 @@ public class MonsterController : MonoBehaviour
             case MonsterNetworkMessageType.MorphDespawned:
                 if (remoteMorphSpawned != null)
                 {
+                    audioSource.PlayOneShot(clownDeath);
+
                     Destroy(remoteMorphSpawned);
                 }
                 break;
@@ -396,6 +400,7 @@ public class MonsterController : MonoBehaviour
                             case MonsterAbilities.ClownMorph:
                             case MonsterAbilities.GirlMorph:
                                 {
+                                    audioSource.PlayOneShot(clownSpawn);
                                     abilityCooldownTimers[currentAbility] = 0f;
                                     transitionCam.transform.position = topDownCam.transform.position;
                                     transitionCam.transform.rotation = topDownCam.transform.rotation;
@@ -482,6 +487,11 @@ public class MonsterController : MonoBehaviour
                     currentAbilityPreview.transform.position = placementPosition;
                 }
             }
+            else if(currentAbilityPreview != null)
+            {
+                currentAbilityPreview.SetActive(false);
+                currentAbilityPreview = null;
+            }
         }
         else // isFirstPerson
         {
@@ -529,6 +539,7 @@ public class MonsterController : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q) || dead || morphDurationTimer > MAX_MORPH_TIME)
             {
+                audioSource.PlayOneShot(clownDeath);
                 morphDurationTimer = 0f;
                 dead = false;
                 transitioning = true;

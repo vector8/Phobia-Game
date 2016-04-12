@@ -141,12 +141,17 @@ namespace CitaNet
             messageQueue.Enqueue(msg);
         }
 
-        void OnApplicationQuit()
+        public void cleanUp()
         {
-            if(initialized)
+            if (initialized)
             {
                 CitaNetWrapper.cleanUp();
             }
+        }
+
+        void OnApplicationQuit()
+        {
+            cleanUp();
         }
 
         private static class CitaNetWrapper
