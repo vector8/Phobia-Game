@@ -14,6 +14,9 @@ public class LobbyClient : MonoBehaviour
     {
         Application.runInBackground = true;
 
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         CitaNetWrapper.initialize(port, serverAddress);
         bool error = checkErrors();
 
