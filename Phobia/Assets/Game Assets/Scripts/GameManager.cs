@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using CitaNet;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
 
     public Player playerController;
     public MonsterController monsterController;
+
+    private float resetTimer = 0f;
+    private const float RESET_DELAY = 5f;
 
     private CitaNetManager citaNetMgr;
 
@@ -55,9 +58,14 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Period) && Input.GetKey(KeyCode.RightShift) && Input.GetKey(KeyCode.RightControl))
+        if(playerController.dead || playerController.won)
         {
-            SceneManager.LoadScene("Main");
+            resetTimer += Time.deltaTime;
+            if(resetTimer >= RESET_DELAY)
+            {
+                citaNetMgr.cleanUp();
+                SceneManager.LoadScene("Menu");
+            }
         }
     }
 }
