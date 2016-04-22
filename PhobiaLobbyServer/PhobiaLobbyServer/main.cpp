@@ -30,10 +30,10 @@ struct Client
 struct Score
 {
 	std::string name;
-	float score;
+	int score;
 };
 
-std::vector<Score> scores;
+std::list<Score> scores;
 
 std::unordered_map<std::string, Client> clients;
 
@@ -126,11 +126,10 @@ void receiveThread()
 						Client monsterClient = clients[monster];
 
 						// send them each a message
-						std::string unitSeparator;
-						unitSeparator += UNIT_SEPARATOR;
-						std::string recordSeparator;
-						recordSeparator += RECORD_SEPARATOR;
-						std::string message = "T" + unitSeparator + "M" + recordSeparator + "A" + unitSeparator + monster;
+						NetworkMessage msg;
+						msg.elements["T"] = "M";
+						msg.elements["A"] = monster;
+						std::string message = msg.toString();
 						send(message, humanClient.address);
 						send(message, monsterClient.address);
 
@@ -148,12 +147,47 @@ void receiveThread()
 				else if (type == "U")	// update high score list
 				{
 					std::cout << "Updating high scores with update from " << senderAddress << std::endl;
-					float score = std::stof(msg.elements["S"]);
+					int score = std::stoi(msg.elements["S"]);
+					Score s;
+					s.name = senderAddress;
+					s.score = score;
+					bool inserted = false;
+					
+					for (auto it = scores.end(); it != scores.begin(); it--)
+					{
+						it--;
+						bool isGreaterThan = (*it).score > s.score;
+						it++;
+						if (isGreaterThan)
+						{
+							scores.insert(it, s);
+							inserted = true;
+							break;
+						}
+					}
+					
+					if (!inserted)
+					{
+						scores.push_front(s);
+					}
 
+					while (scores.size() > 10)
+					{
+						scores.pop_back();
+					}
 				}
 				else if (type == "G")	// retrieve high score list
 				{
 					std::cout << "Sending high score list to " << senderAddress << std::endl;
+					std::string scoresMsg = "";
+					for (auto it = scores.begin(); it != scores.end(); it++)
+					{
+						scoresMsg += (*it).name + "\t:\t" + std::to_string((*it).score) + "\n";
+					}
+					NetworkMessage msg;
+					msg.elements["T"] = "G";
+					msg.elements["S"] = scoresMsg;
+					send(msg.toString(), senderAddr);
 				}
 			}
 		}

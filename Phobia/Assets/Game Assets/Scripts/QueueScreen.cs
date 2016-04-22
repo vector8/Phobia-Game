@@ -48,4 +48,13 @@ public class QueueScreen : MonoBehaviour
         gameObject.SetActive(false);
         optionsMenu.SetActive(true);
     }
+
+    public void exitButtonPressed()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_STANDALONE
+        Application.Quit();
+#endif
+    }
 }

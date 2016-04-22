@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 public class LobbyClient : MonoBehaviour
@@ -17,6 +19,18 @@ public class LobbyClient : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
+        try
+        {
+            TextReader tr = new StreamReader("server.cfg");
+            string address = tr.ReadLine();
+            serverAddress = address.Trim();
+            tr.Close();
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Could not read from server.cfg");
+        }
+
         CitaNetWrapper.initialize(port, serverAddress);
         bool error = checkErrors();
 
@@ -27,6 +41,19 @@ public class LobbyClient : MonoBehaviour
         else
         {
             initialized = true;
+        }
+
+        if (GameSettings.scoreNeedsUpdating)
+        {
+            CitaNet.NetworkMessage msg = new CitaNet.NetworkMessage();
+            msg.setString("T", "U");
+            msg.setInt("S", GameSettings.lastScore);
+            sendMessage(msg);
+            GameSettings.scoreNeedsUpdating = false;
+
+            // temp code, retrieve scores list here since we dont have a high scores screen
+            msg.setString("T", "G");
+            sendMessage(msg);
         }
     }
 

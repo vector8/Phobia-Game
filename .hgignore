@@ -9,3 +9,5 @@ Phobia/Temp/*
 PhobiaLobbyServer/Debug/*
 PhobiaLobbyServer/PhobiaLobbyServer.VC.opendb
 PhobiaLobbyServer/PhobiaLobbyServer.sdf
+PhobiaLobbyServer/PhobiaLobbyServer/Release/*
+PhobiaLobbyServer/Release/*

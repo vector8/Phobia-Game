@@ -6,8 +6,8 @@ public class FuseBox : Interactable
 {
     public GameObject[] fuses;
     public Player player;
+    public int fusesActive = 0;
 
-    private int fusesActive = 0;
     private AudioSource audioSource;
 
     // Use this for initialization
