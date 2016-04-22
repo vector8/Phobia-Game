@@ -47,7 +47,7 @@ namespace CitaNet
         public void setFloat(string key, float value)
         {
             Debug.Assert(!key.Contains(RECORD_SEPARATOR.ToString()) && !key.Contains(UNIT_SEPARATOR.ToString()), "Key cannot contain record or unit seperator characters.");
-            messageParts.Add(key, value.ToString());
+            messageParts[key] = value.ToString();
         }
 
         public bool getFloat(string key, out float result)
@@ -68,7 +68,7 @@ namespace CitaNet
         public void setInt(string key, int value)
         {
             Debug.Assert(!key.Contains(RECORD_SEPARATOR.ToString()) && !key.Contains(UNIT_SEPARATOR.ToString()), "Key cannot contain record or unit seperator characters.");
-            messageParts.Add(key, value.ToString());
+            messageParts[key] = value.ToString();
         }
 
         public bool getInt(string key, out int result)
@@ -89,7 +89,7 @@ namespace CitaNet
         public void setBool(string key, bool value)
         {
             Debug.Assert(!key.Contains(RECORD_SEPARATOR.ToString()) && !key.Contains(UNIT_SEPARATOR.ToString()), "Key cannot contain record or unit seperator characters.");
-            messageParts.Add(key, value.ToString());
+            messageParts[key] = value.ToString();
         }
 
         public bool getBool(string key, out bool result)
@@ -111,7 +111,7 @@ namespace CitaNet
         {
             Debug.Assert(!key.Contains(RECORD_SEPARATOR.ToString()) && !key.Contains(UNIT_SEPARATOR.ToString()), "Key cannot contain record or unit seperator characters.");
             Debug.Assert(!value.Contains(RECORD_SEPARATOR.ToString()) && !value.Contains(UNIT_SEPARATOR.ToString()), "Value cannot contain record or unit seperator characters.");
-            messageParts.Add(key, value);
+            messageParts[key] = value;
         }
 
         public bool getString(string key, out string result)

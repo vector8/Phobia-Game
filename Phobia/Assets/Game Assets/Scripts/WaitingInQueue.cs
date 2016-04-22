@@ -20,7 +20,7 @@ public class WaitingInQueue : MonoBehaviour
         int seconds = ((int)time) % 60;
 
         string secString = seconds.ToString();
-        if(seconds < 10)
+        if (seconds < 10)
         {
             secString = "0" + secString;
         }
@@ -39,23 +39,28 @@ public class WaitingInQueue : MonoBehaviour
 
     public void networkMessageReceived(CitaNet.NetworkMessage msg)
     {
-        if (gameObject.activeSelf)
+        string type;
+        msg.getString("T", out type);
+        if (type == "M" && gameObject.activeSelf)
         {
-            string type;
-            msg.getString("T", out type);
-            if (type == "M")
-            {
-                // match found.
-                string address;
-                msg.getString("A", out address);
+            // match found.
+            string address;
+            msg.getString("A", out address);
 
-                // set game settings and switch scenes
-                GameSettings.monsterAddress = address;
-                GameSettings.settingsSetFromMenu = true;
-                GameSettings.playingAs = (GameSettings.PlayModes)queuedAs;
-                lobby.cleanUp();
-                SceneManager.LoadScene("Main");
-            }
+            // set game settings and switch scenes
+            GameSettings.monsterAddress = address;
+            GameSettings.settingsSetFromMenu = true;
+            GameSettings.playingAs = (GameSettings.PlayModes)queuedAs;
+            lobby.cleanUp();
+            SceneManager.LoadScene("Main");
+        }
+        else if (type == "G") // scores were returned by lobby server
+        {
+            string scores;
+            msg.getString("S", out scores);
+
+            // no functionality right now to display scores, just print to console
+            Debug.Log(scores);
         }
     }
 }

@@ -20,4 +20,7 @@ public static class GameSettings
     public static HumanControlSchemes controlScheme;
     public static string monsterAddress;
     public static int port = 8888;
+
+    public static bool scoreNeedsUpdating = false;
+    public static int lastScore;
 }
